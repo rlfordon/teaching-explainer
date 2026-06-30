@@ -27,6 +27,12 @@
 .te-mc-feedback:empty { display: none; }
 .te-correct { color: var(--te-correct); font-weight: 600; }
 .te-incorrect { color: var(--te-incorrect); font-weight: 600; }
+.te-se-q { display:block; font-weight:600; margin-bottom: var(--te-gap); }
+.te-se-input { display:block; width:100%; min-height:90px; font:inherit; padding:8px;
+  border:1px solid #6b7280; border-radius:var(--te-radius); margin-bottom: var(--te-gap); }
+.te-se-reveal[disabled] { opacity:.5; cursor:not-allowed; }
+.te-se-model { margin-top: var(--te-gap); padding:12px; border-left:4px solid var(--te-accent);
+  background:#f3f4f6; }
 @media (prefers-reduced-motion: reduce) {
   .te-component * { animation: none !important; transition: none !important; }
 }

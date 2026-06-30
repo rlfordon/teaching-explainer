@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TE fixture</title>
+  <link rel="stylesheet" href="../../teaching-explainer/assets/components.css">
+</head>
+<body>
+  <main id="root">
+    <div data-te="self-explain" class="te-component">
+      <label for="se1" class="te-se-q">Why did the grounded prompt beat the open one?</label>
+      <textarea id="se1" class="te-se-input"></textarea>
+      <button type="button" class="te-btn te-se-reveal" disabled aria-disabled="true">
+        Reveal model answer</button>
+      <div class="te-se-model" hidden>Because grounding constrains the model to cited sources…</div>
+    </div>
+  </main>
+  <script src="../../teaching-explainer/assets/components.js"></script>
+</body>
+</html>

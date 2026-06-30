@@ -79,6 +79,22 @@
     });
   };
 
+  registry['self-explain'] = function (el) {
+    const input = el.querySelector('.te-se-input');
+    const btn = el.querySelector('.te-se-reveal');
+    const model = el.querySelector('.te-se-model');
+    model.setAttribute('tabindex', '-1');
+    input.addEventListener('input', () => {
+      const ready = input.value.trim().length > 0;
+      btn.disabled = !ready;
+      btn.setAttribute('aria-disabled', String(!ready));
+    });
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      model.hidden = false; model.focus(); announce('Model answer revealed');
+    });
+  };
+
   window.TE = { init, _registry: registry };
   document.addEventListener('DOMContentLoaded', () => init(document));
 })();
