@@ -17,6 +17,11 @@
 *:focus-visible { outline: 3px solid var(--te-focus); outline-offset: 2px; }
 .te-btn { min-height: 44px; min-width: 44px; padding: 10px 16px; border-radius: var(--te-radius);
   font: inherit; cursor: pointer; }
+.te-pr-input { display: block; width: 100%; min-height: 80px; margin: var(--te-gap) 0;
+  font: inherit; padding: 8px; border: 1px solid #6b7280; border-radius: var(--te-radius); }
+.te-pr-reveal[aria-expanded="true"] { opacity: .6; }
+.te-pr-answer { margin-top: var(--te-gap); padding: 12px; border-left: 4px solid var(--te-accent);
+  background: #f3f4f6; color: var(--te-ink); }
 @media (prefers-reduced-motion: reduce) {
   .te-component * { animation: none !important; transition: none !important; }
 }

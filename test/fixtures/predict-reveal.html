@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TE fixture</title>
+  <link rel="stylesheet" href="../../teaching-explainer/assets/components.css">
+</head>
+<body>
+  <main id="root">
+    <div data-te="predict-reveal" class="te-component">
+      <p class="te-pr-prompt" id="pr1">Predict the court's holding, then reveal.</p>
+      <label class="te-sr-only" for="pr1-input">Your prediction</label>
+      <textarea id="pr1-input" class="te-pr-input" aria-labelledby="pr1"></textarea>
+      <button type="button" class="te-btn te-pr-reveal" aria-expanded="false">Reveal answer</button>
+      <div class="te-pr-answer" hidden>The court held that…</div>
+    </div>
+  </main>
+  <script src="../../teaching-explainer/assets/components.js"></script>
+</body>
+</html>

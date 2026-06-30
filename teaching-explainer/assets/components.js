@@ -3,6 +3,20 @@
 (function () {
   const registry = {}; // name -> init(el)
 
+  function announce(msg) {
+    let live = document.getElementById('te-live');
+    if (!live) {
+      live = document.createElement('div');
+      live.id = 'te-live';
+      live.className = 'te-sr-only';
+      live.setAttribute('aria-live', 'polite');
+      live.setAttribute('role', 'status');
+      document.body.appendChild(live);
+    }
+    live.textContent = '';
+    requestAnimationFrame(() => { live.textContent = msg; });
+  }
+
   function init(root) {
     const scope = root || document;
     const els = scope.querySelectorAll('[data-te]');
@@ -17,6 +31,20 @@
     });
     return n;
   }
+
+  registry['predict-reveal'] = function (el) {
+    const btn = el.querySelector('.te-pr-reveal');
+    const answer = el.querySelector('.te-pr-answer');
+    if (!btn || !answer) return;
+    answer.setAttribute('tabindex', '-1');
+    btn.addEventListener('click', () => {
+      answer.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      btn.disabled = true;
+      answer.focus();
+      announce('Answer revealed');
+    });
+  };
 
   window.TE = { init, _registry: registry };
   document.addEventListener('DOMContentLoaded', () => init(document));
