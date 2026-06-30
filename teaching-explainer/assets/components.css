@@ -38,6 +38,9 @@
 .te-cl-item.te-cl-done { background:#e8f5e9; color: var(--te-correct); }
 .te-cl-cats { display:flex; gap: var(--te-gap); margin: var(--te-gap) 0; }
 .te-cl-feedback:empty { display:none; }
+.te-st-step[hidden] { display:none; }
+.te-st-nav { display:flex; gap: var(--te-gap); margin-top: var(--te-gap); }
+.te-st-prev[disabled], .te-st-next[disabled] { opacity:.5; cursor:not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   .te-component * { animation: none !important; transition: none !important; }
 }

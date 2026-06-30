@@ -129,6 +129,24 @@
     });
   };
 
+  registry['step-through'] = function (el) {
+    const steps = [...el.querySelectorAll('.te-st-step')];
+    const prog = el.querySelector('.te-st-progress');
+    const prev = el.querySelector('.te-st-prev');
+    const next = el.querySelector('.te-st-next');
+    let i = 0;
+    function render(focus) {
+      steps.forEach((s, j) => { s.hidden = j !== i; });
+      prog.textContent = `Step ${i + 1} of ${steps.length}`;
+      prev.disabled = i === 0;
+      next.disabled = i === steps.length - 1;
+      if (focus) steps[i].querySelector('h3').focus();
+    }
+    prev.addEventListener('click', () => { if (i > 0) { i--; render(true); } });
+    next.addEventListener('click', () => { if (i < steps.length - 1) { i++; render(true); } });
+    render(false);
+  };
+
   window.TE = { init, _registry: registry };
   document.addEventListener('DOMContentLoaded', () => init(document));
 })();
