@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompting AI for Legal Work</title>
+<style>
+  /* ---------- page design tokens (system fonts only — no network, works offline) ---------- */
+  :root{
+    --paper:#ffffff; --ink:#1a1a1a; --muted:#4b5563; --line:#e5e7eb;
+    --band:#f7f7f5; --navy:#1d4ed8; --navy-ink:#1e3a8a;
+    --caution-bg:#fdf6e3; --caution-ink:#7a4f01; --caution-line:#e8c97a;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --maxw:1140px; --prose:68ch;
+    /* kit tokens (match teaching-explainer/assets/components.css) */
+    --te-ink:#1a1a1a; --te-bg:#fff; --te-accent:#1d4ed8; --te-correct:#1b5e20;
+    --te-incorrect:#b00020; --te-focus:#1d4ed8; --te-radius:8px; --te-gap:12px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:18px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .prose{max-width:var(--prose)}
+  p{margin:0 0 1em}
+  h1,h2,h3{font-family:var(--serif);line-height:1.15;color:var(--ink)}
+  h2{font-size:1.9rem;margin:0 0 .4em}
+  h3{font-size:1.25rem;margin:1.4em 0 .3em}
+  a{color:var(--navy-ink)}
+  a:focus-visible,button:focus-visible,[tabindex]:focus-visible,input:focus-visible,textarea:focus-visible{
+    outline:3px solid var(--te-focus);outline-offset:2px}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--navy);color:#fff;padding:10px 16px;z-index:100;border-radius:0 0 8px 0}
+  .skip:focus{left:0}
+  /* ---------- hero ---------- */
+  header.hero{border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fbfbf9,#fff)}
+  .eyebrow{font-family:var(--sans);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem;
+    font-weight:700;color:var(--navy-ink);margin:0 0 14px}
+  h1{font-size:clamp(2.1rem,5vw,3.2rem);margin:0 0 .25em;letter-spacing:-.01em}
+  .dek{font-size:1.25rem;color:var(--muted);max-width:60ch;margin:0 0 1.2em}
+  .meta{font-size:.9rem;color:var(--muted);display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+  .hero-inner{padding:64px 0 40px}
+  /* ---------- sticky nav ---------- */
+  nav.toc{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line)}
+  nav.toc ol{display:flex;flex-wrap:wrap;gap:4px 20px;margin:0;padding:12px 24px;max-width:var(--maxw);
+    margin:0 auto;list-style:none;font-size:.86rem}
+  nav.toc a{color:var(--muted);text-decoration:none;font-weight:600}
+  nav.toc a:hover{color:var(--navy-ink)}
+  nav.toc .n{color:var(--navy);font-variant-numeric:tabular-nums}
+  /* ---------- sections ---------- */
+  section{padding:52px 0;border-bottom:1px solid var(--line)}
+  section.band{background:var(--band)}
+  .lede{font-size:1.18rem}
+  .kicker{font-family:var(--sans);text-transform:uppercase;letter-spacing:.07em;font-size:.76rem;
+    font-weight:700;color:var(--navy);margin:0 0 6px}
+  /* ---------- mental-model callout ---------- */
+  .model{border-left:4px solid var(--navy);background:#f0f4ff;padding:20px 22px;border-radius:0 8px 8px 0;margin:8px 0 4px}
+  .model strong{color:var(--navy-ink)}
+  /* ---------- prompt compare cards ---------- */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+  @media(max-width:680px){.compare{grid-template-columns:1fr}}
+  .card{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:#fff}
+  .card h4{margin:0 0 8px;font-family:var(--sans);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+  .card.weak h4{color:var(--te-incorrect)} .card.strong h4{color:var(--te-correct)}
+  .card pre{white-space:pre-wrap;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:.92rem;line-height:1.5;background:#f7f7f5;border-radius:6px;padding:12px;margin:0;color:#111}
+  /* ---------- platform cards ---------- */
+  .platforms{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:18px}
+  .platform{border:1px solid var(--line);border-radius:10px;padding:18px;background:#fff}
+  .platform h3{margin:0 0 6px;font-size:1.08rem}
+  .platform .tag{font-size:.74rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.05em}
+  .platform ul{margin:10px 0 0;padding-left:1.1em} .platform li{margin:.3em 0;font-size:.95rem}
+  /* ---------- badges / trust ---------- */
+  .badge{display:inline-block;background:var(--caution-bg);color:var(--caution-ink);
+    border:1px solid var(--caution-line);border-radius:999px;padding:4px 12px;font-size:.8rem;font-weight:600}
+  .statline{display:flex;gap:22px;flex-wrap:wrap;margin:18px 0}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:14px 18px;background:#fff;min-width:150px}
+  .stat .big{font-family:var(--serif);font-size:2rem;color:var(--te-incorrect);line-height:1}
+  .stat .lab{font-size:.84rem;color:var(--muted);margin-top:4px}
+  sup a{text-decoration:none;font-weight:700}
+  .ref{font-size:.82rem;color:var(--muted)}
+  /* ---------- kit interaction styling (primary/secondary hierarchy) ---------- */
+  .te-component{margin:22px 0;font-family:var(--sans)}
+  .ix{border:1px solid var(--line);border-radius:12px;padding:20px 22px;background:#fff;margin:22px 0}
+  .ix .ix-h{font-family:var(--sans);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;
+    font-weight:700;color:var(--navy);margin:0 0 10px}
+  .te-btn{border:1px solid var(--navy);background:#fff;color:var(--navy-ink);font-weight:600}
+  .te-pr-reveal,.te-mc-check,.te-se-reveal,.te-st-next{background:var(--navy);color:#fff;border:1px solid var(--navy)}
+  .te-st-prev{background:#fff;color:var(--navy-ink)}
+  .te-cl-item{background:#f1f5f9;border:1px solid #cbd5e1;color:#1a1a1a;font-weight:500}
+  .te-cl-cat{background:var(--navy);color:#fff;border:1px solid var(--navy);font-weight:600}
+  .te-cl-cats{flex-wrap:wrap}
+  .te-mc legend{font-weight:700;font-size:1.05rem;padding:0;margin-bottom:6px}
+  .te-mc-opt{border-radius:6px} .te-mc-opt:hover{background:#f7f7f5}
+  [data-te-tally]{display:inline-block;background:#f0f4ff;border:1px solid #c7d2fe;border-radius:999px;
+    padding:4px 14px;font-weight:600;color:var(--navy-ink);font-size:.9rem}
+  /* ---------- quick reference ---------- */
+  .qr{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:16px}
+  .qr div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff}
+  .qr h4{margin:0 0 6px;font-size:.95rem}
+  /* ---------- footer / sources ---------- */
+  footer{padding:48px 0 80px;background:var(--band)}
+  footer h2{font-size:1.4rem}
+  .sources{font-size:.9rem;color:var(--muted)} .sources li{margin:.4em 0}
+  .disclaimer{font-size:.86rem;color:var(--muted);border-top:1px solid var(--line);margin-top:24px;padding-top:16px}
+  .fade{animation:fade .5s ease both}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){.fade{animation:none}}
+</style>
+</head>
+<body data-review-toggle>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hero">
+  <div class="wrap hero-inner fade">
+    <p class="eyebrow">Legal technology · A teaching explainer</p>
+    <h1>Prompting AI for legal work</h1>
+    <p class="dek">How to get useful, trustworthy results from AI tools — from general chatbots to the grounded research platforms you'll use in practice — and how to verify what comes back.</p>
+    <div class="meta">
+      <span>~10 minute read</span>
+      <span>Interactive — try the prompts as you go</span>
+      <span>For law students, new and experienced</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <ol>
+    <li><a href="#model"><span class="n">1</span> The new associate</a></li>
+    <li><a href="#shift"><span class="n">2</span> What changed</a></li>
+    <li><a href="#five"><span class="n">3</span> Five jobs of a prompt</a></li>
+    <li><a href="#grounded"><span class="n">4</span> Chatbot vs. grounded tool</a></li>
+    <li><a href="#platforms"><span class="n">5</span> Inside the platforms</a></li>
+    <li><a href="#verify"><span class="n">6</span> Verify everything</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+
+<!-- ========================= 1. MENTAL MODEL ========================= -->
+<section id="model">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">Start here</p>
+      <h2>Think of the AI as a brilliant new associate</h2>
+      <p class="lede">One mental model carries this whole guide. Picture the AI as a brilliant, fast, eager-to-please new associate — with three quirks you have to manage.</p>
+      <div class="model">
+        <p>This associate is <strong>fast and capable</strong>, but they <strong>take everything literally</strong>, they <strong>can't read your mind</strong>, and — most dangerous — they would rather <strong>confidently make something up</strong> than admit they don't know.</p>
+      </div>
+      <p>Everything that follows is just good delegation. A strong prompt is a well-written assignment: it says what you want, gives the background the associate couldn't know, and sets up a way to check the work. A weak prompt is the one-line hallway request that sends a junior associate down the wrong path for three hours.</p>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Try it — predict, then reveal</p>
+      <div data-te="predict-reveal" class="te-component">
+        <p class="te-se-q">A partner walks by and says: <em>"See if we can get out of the Acme lease."</em> A brilliant-but-literal new associate can't act on that yet. What does the request leave out?</p>
+        <label class="te-sr-only" for="pr1">Your prediction</label>
+        <textarea id="pr1" class="te-pr-input" aria-label="What is missing from the request? Type your prediction."></textarea>
+        <button type="button" class="te-btn te-pr-reveal" aria-expanded="false">Reveal</button>
+        <div class="te-pr-answer" hidden>
+          <p style="margin:0">At least: <strong>which jurisdiction's law</strong> governs; the <strong>actual lease terms</strong> (the associate hasn't read it); the <strong>goal</strong> (terminate? renegotiate? sublet? limit damages?); the <strong>deliverable</strong> (a quick read, a memo, an email to the client?); and any <strong>deadline</strong>. A good AI prompt front-loads exactly these — because the model, like the associate, won't ask.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= 2. WHAT CHANGED ========================= -->
+<section id="shift" class="band">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">Unlearn the old tricks</p>
+      <h2>What changed: the model got smarter than the tricks</h2>
+      <p>A lot of prompting folklore comes from 2023. Today's <strong>reasoning models</strong> (the current top-tier models) already work through problems step by step internally. Telling one to "think step by step" now duplicates what it already does and can make the answer <em>worse</em>.<sup><a href="#s-prompt">1</a></sup> Give it the task and the constraints, then get out of the way.</p>
+      <p>Some habits still earn their keep; others are cargo cult. Sort them.</p>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Sort each move — select it, then choose a bin</p>
+      <div data-te="classify" class="te-component te-cl">
+        <ul class="te-cl-items">
+          <li><button type="button" class="te-btn te-cl-item" data-cat="keep">Give the relevant facts and context</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="keep">Specify the format you want back</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="keep">Show one example of a good answer</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="skip">Tell a reasoning model to "think step by step"</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="skip">Add "you are an expert attorney"</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="skip">Offer the model a $200 tip</button></li>
+        </ul>
+        <div class="te-cl-cats">
+          <button type="button" class="te-btn te-cl-cat" data-cat="keep">Still earns its keep</button>
+          <button type="button" class="te-btn te-cl-cat" data-cat="skip">Cargo cult</button>
+        </div>
+        <p class="te-cl-feedback"></p>
+      </div>
+      <p class="ref">Why the "skip" pile: role-play openers and tip/threat tricks were never reliable, and explicit step-by-step instructions are redundant on models that already reason. Save chain-of-thought for cheaper, non-reasoning models, where it can still help.<sup><a href="#s-prompt">1</a></sup></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= 3. FIVE JOBS ========================= -->
+<section id="five">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">The durable core</p>
+      <h2>The five jobs of a good prompt</h2>
+      <p>Strip away the trends and a good prompt does five things. These hold across tools and model generations.</p>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Walk through the five jobs</p>
+      <div data-te="step-through" class="te-component te-st">
+        <p class="te-st-progress"></p>
+        <ol class="te-st-steps" style="list-style:none;padding:0;margin:0">
+          <li class="te-st-step"><h3 tabindex="-1">1 · Task</h3><p>Say exactly what you want done, and the goal behind it. "Summarize," "compare," "draft," "find authority for" — and what the output is <em>for</em>. Vague verbs get vague answers.</p></li>
+          <li class="te-st-step"><h3 tabindex="-1">2 · Context</h3><p>Supply what the model can't know: jurisdiction, the operative facts, the audience, the constraints. Put the critical instructions <strong>first and last</strong> — models reliably lose information buried in the middle of a long prompt.<sup><a href="#s-prompt">1</a></sup></p></li>
+          <li class="te-st-step"><h3 tabindex="-1">3 · Format</h3><p>Name the shape of the answer: a memo, an IRAC paragraph, a three-column table, a bulleted issues list, a word limit. If you don't specify, you take what you get.</p></li>
+          <li class="te-st-step"><h3 tabindex="-1">4 · Examples (when form matters)</h3><p>If the style or structure matters, show one short example of a good answer. One well-chosen example often beats a paragraph of instructions.</p></li>
+          <li class="te-st-step"><h3 tabindex="-1">5 · Set up verification</h3><p>Ask it to cite its sources, flag uncertainty, and list the assumptions it made. You're not trusting the output — you're making it <em>checkable</em>. This sets up Section 6.</p></li>
+        </ol>
+        <div class="te-st-nav">
+          <button type="button" class="te-btn te-st-prev">Back</button>
+          <button type="button" class="te-btn te-st-next">Next</button>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="card weak">
+          <h4>Weak prompt</h4>
+          <pre>find cases about emotional support animals and apartments</pre>
+        </div>
+        <div class="card strong">
+          <h4>Doing the five jobs</h4>
+          <pre>Task: Find controlling authority on whether a landlord
+must allow an emotional support animal despite a no-pets clause.
+Context: Ohio; private apartment; tenant has a provider's letter;
+landlord cites the lease. I'm writing a client advice memo.
+Format: IRAC, with case citations I can verify.
+Flag any point where the law is unsettled.</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Quick check</p>
+      <div data-te="retrieval-mc" class="te-component te-mc"
+           data-answer="2"
+           data-why="reasoning models already reason internally, so an explicit 'think step by step' is the least useful add — the other four supply information the model genuinely lacks.">
+        <fieldset style="border:0;padding:0;margin:0">
+        <legend>On a modern reasoning model, which addition is usually <em>least</em> useful?</legend>
+        <label class="te-mc-opt"><input type="radio" name="q1" value="0"> Telling it which jurisdiction's law applies</label>
+        <label class="te-mc-opt"><input type="radio" name="q1" value="1"> Specifying that you want an IRAC memo</label>
+        <label class="te-mc-opt"><input type="radio" name="q1" value="2"> Adding "let's think step by step"</label>
+        <label class="te-mc-opt"><input type="radio" name="q1" value="3"> Pasting the relevant facts</label>
+        </fieldset>
+        <button type="button" class="te-btn te-mc-check">Check answer</button>
+        <p class="te-mc-feedback"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= 4. GROUNDED VS CHATBOT ========================= -->
+<section id="grounded" class="band">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">Know which tool you're holding</p>
+      <h2>Open chatbot vs. grounded legal tool</h2>
+      <p>This distinction matters more than any prompting trick.</p>
+      <p>An <strong>open chatbot</strong> (ChatGPT, Claude, Gemini on their own) generates text from patterns in its training. It has <em>no live connection</em> to a legal database. Ask it for cases and it will produce something that <em>looks</em> like authority — sometimes real, sometimes invented.</p>
+      <p>A <strong>grounded legal tool</strong> (Lexis+ AI / Protégé, Westlaw's CoCounsel and AI-Assisted Research, vLex's Vincent) wraps a model around a curated legal database. It retrieves actual authority and answers from it, then links you to the source. You can ask in plain English. Grounding makes hallucinated citations far less likely — but, as Section 6 shows, <em>not impossible</em>.</p>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Explain it in your own words</p>
+      <div data-te="self-explain" class="te-component">
+        <label class="te-se-q" for="se1">Why is it risky to ask a general chatbot — not a grounded legal tool — to "give me three cases that support this argument"?</label>
+        <textarea id="se1" class="te-se-input" placeholder="Type a sentence or two, then reveal a model answer to compare."></textarea>
+        <button type="button" class="te-btn te-se-reveal" disabled aria-disabled="true">Reveal model answer</button>
+        <div class="te-se-model" hidden>
+          <p style="margin:0">Because an open chatbot composes a plausible-sounding answer from training patterns rather than retrieving real authority. Asked for supportive cases, it will generate citations that look right but may not exist, or may not say what it claims. A grounded tool pulls from an actual legal database and links the source — so you can check it. Either way, you verify; with the open chatbot, verification is the <em>only</em> thing standing between you and a fake citation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= 5. PLATFORMS ========================= -->
+<section id="platforms">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">The legal-platform layer</p>
+      <h2>Inside the legal research platforms</h2>
+      <p>Grounded tools reward a slightly different style than a chatbot: focused legal questions with the material facts. Specifics below are current as of mid-2026 — features change fast, so confirm against each vendor's own guidance.</p>
+      <p><span class="badge">Platform details as of June 2026 — verify against current vendor docs</span></p>
+    </div>
+
+    <div class="platforms">
+      <div class="platform">
+        <span class="tag">Westlaw</span>
+        <h3>CoCounsel &amp; AI-Assisted Research</h3>
+        <ul>
+          <li>Write a <strong>focused legal question</strong>; include the <strong>material facts</strong>, omit background.<sup><a href="#s-wl">3</a></sup></li>
+          <li>Don't prompt like a Boolean search — avoid "find cases that…" and proper names of parties or places.<sup><a href="#s-wl">3</a></sup></li>
+          <li>Treat it as a research <em>accelerant</em>, not a replacement for reading the authority.</li>
+        </ul>
+      </div>
+      <div class="platform">
+        <span class="tag">LexisNexis</span>
+        <h3>Lexis+ AI / Protégé</h3>
+        <ul>
+          <li><strong>Ask</strong> gives a grounded answer to a legal question, tied to primary sources.<sup><a href="#s-lexis">2</a></sup></li>
+          <li><strong>Guided research</strong> proposes a step-by-step plan you can confirm, edit, or discard.<sup><a href="#s-lexis">2</a></sup></li>
+          <li>It expects legal questions — not open-ended chit-chat.</li>
+        </ul>
+      </div>
+      <div class="platform">
+        <span class="tag">vLex</span>
+        <h3>Vincent</h3>
+        <ul>
+          <li>Fans one query into several searches across cases, statutes, and secondary sources, then reports back.<sup><a href="#s-vlex">4</a></sup></li>
+          <li><strong>Hyperlinks every authority</strong> to the quoted passage, so you can click straight to the source.<sup><a href="#s-vlex">4</a></sup></li>
+          <li>States when it can't find real support instead of inventing it.<sup><a href="#s-vlex">4</a></sup></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Quick check</p>
+      <div data-te="retrieval-mc" class="te-component te-mc"
+           data-answer="1"
+           data-why="grounded research tools want a focused natural-language question with the material facts — not Boolean-style 'find cases that…' commands or party names.">
+        <fieldset style="border:0;padding:0;margin:0">
+        <legend>Which prompt style fits Westlaw's AI-Assisted Research best?</legend>
+        <label class="te-mc-opt"><input type="radio" name="q2" value="0"> dog /p (bite OR attack) &amp; landlord</label>
+        <label class="te-mc-opt"><input type="radio" name="q2" value="1"> A focused question with the key facts: "Is an Ohio landlord liable for a tenant's dog bite in a common area?"</label>
+        <label class="te-mc-opt"><input type="radio" name="q2" value="2"> "Find every case where Smith v. Jones was cited."</label>
+        </fieldset>
+        <button type="button" class="te-btn te-mc-check">Check answer</button>
+        <p class="te-mc-feedback"></p>
+      </div>
+      <p class="ref" style="margin-top:14px">Running score for the checks on this page: <span data-te-tally data-correct="0" data-total="0">Score: 0 / 0</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= 6. VERIFY ========================= -->
+<section id="verify" class="band">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">The non-negotiable</p>
+      <h2>Verify everything — even the grounded tools</h2>
+      <p>Remember the associate who would rather invent than admit doubt. Grounding reduces that, but does not remove it. A Stanford study of purpose-built legal AI tools still found incorrect output more than a third of the time for one major research product, and roughly one in six for another.<sup><a href="#s-stanford">5</a></sup></p>
+      <div class="statline">
+        <div class="stat"><div class="big">17%+</div><div class="lab">Lexis+ AI responses with incorrect information (Stanford, 2024–25)<sup><a href="#s-stanford">5</a></sup></div></div>
+        <div class="stat"><div class="big">34%+</div><div class="lab">Westlaw AI-Assisted Research, same study<sup><a href="#s-stanford">5</a></sup></div></div>
+        <div class="stat"><div class="big">1,300+</div><div class="lab">Court filings with AI-fabricated content catalogued by mid-2026<sup><a href="#s-halluc">6</a></sup></div></div>
+      </div>
+      <p>The consequences are real: courts have imposed escalating sanctions, suspensions, and bar referrals on lawyers who filed AI-invented citations.<sup><a href="#s-sanctions">7</a></sup> The duty of candor and competence doesn't bend because a machine drafted the cite.</p>
+      <p><strong>The verification standard for any AI-supplied authority:</strong> confirm the source <em>exists</em>, confirm it <em>actually says</em> what it's cited for, and check that nothing better was <em>missed</em>. And never paste confidential or privileged material into a tool your institution hasn't approved.</p>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Predict the number</p>
+      <div data-te="predict-reveal" class="te-component">
+        <p class="te-se-q">In that Stanford study, how often did Westlaw's purpose-built AI research tool still return incorrect information? Predict, then reveal.</p>
+        <button type="button" class="te-btn te-pr-reveal" aria-expanded="false">Reveal</button>
+        <div class="te-pr-answer" hidden>
+          <p style="margin:0">More than <strong>one in three</strong> responses (34%+).<sup><a href="#s-stanford">5</a></sup> A tool built for law, grounded in a real database — and still wrong a third of the time. That's the whole case for verifying every citation yourself.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Final check</p>
+      <div data-te="retrieval-mc" class="te-component te-mc"
+           data-answer="2"
+           data-why="a citation can be real yet mis-cited; verifying means confirming the source exists AND that it actually supports the point.">
+        <fieldset style="border:0;padding:0;margin:0">
+        <legend>"Verifying" an AI's case citation means confirming that…</legend>
+        <label class="te-mc-opt"><input type="radio" name="q3" value="0"> the case exists</label>
+        <label class="te-mc-opt"><input type="radio" name="q3" value="1"> the citation is formatted correctly</label>
+        <label class="te-mc-opt"><input type="radio" name="q3" value="2"> the case exists and actually says what it's cited for</label>
+        </fieldset>
+        <button type="button" class="te-btn te-mc-check">Check answer</button>
+        <p class="te-mc-feedback"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= WRAP ========================= -->
+<section id="recap">
+  <div class="wrap">
+    <div class="prose"><h2>The whole thing on one card</h2></div>
+    <div class="qr">
+      <div><h4>The model</h4><p style="margin:0">A brilliant, literal new associate who can't read your mind and won't push back.</p></div>
+      <div><h4>Five jobs</h4><p style="margin:0">Task · Context · Format · Example (when form matters) · Set up verification.</p></div>
+      <div><h4>Know your tool</h4><p style="margin:0">Open chatbot generates; grounded legal tool retrieves and cites. Prompt grounded tools with focused questions + material facts.</p></div>
+      <div><h4>Always verify</h4><p style="margin:0">Source exists, says what it's cited for, nothing better missed. Never paste privileged data into unapproved tools.</p></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <h2>Sources &amp; notes</h2>
+    <p class="ref">Platform features change frequently; the platform section reflects vendor and law-library guidance as of June 2026. Verify against each vendor's current documentation before relying on specifics.</p>
+    <ol class="sources">
+      <li id="s-prompt">Current prompting guidance for reasoning models (chain-of-thought now often redundant; context placement; structured output): <a href="https://karozieminski.substack.com/p/ai-prompting-techniques-reasoning-models-2026">Every AI prompting technique that works on reasoning models (2026)</a>; <a href="https://pecollective.com/blog/prompt-engineering-best-practices/">Prompt Engineering Best Practices 2026</a>.</li>
+      <li id="s-lexis">Lexis+ AI / Protégé prompting and modes: <a href="https://www.lexisnexis.com/en-us/products/lexis-plus-protege.page">LexisNexis — Lexis+ with Protégé</a>; <a href="https://lawlibguides.usc.edu/c.php?g=1447399&p=10757499">USC Gould Law Library — Lexis AI research tools</a>.</li>
+      <li id="s-wl">Westlaw CoCounsel / AI-Assisted Research prompting (focused questions, material facts, avoid Boolean-style and proper names): <a href="https://lawlibguides.usc.edu/c.php?g=1447399&p=10757364">USC Gould Law Library — Westlaw AI tools</a>; <a href="https://lawguides.suffolk.edu/AIFac/CoCounsel">Suffolk Moakley Law Library — CoCounsel</a>.</li>
+      <li id="s-vlex">vLex Vincent (multi-prompt fan-out; hyperlinked authorities; states when no support found): <a href="https://vlex.com/news/How-It-Works-Generative-AI">vLex — How it works: Generative AI</a>; <a href="https://lawyerist.com/reviews/artificial-intelligence-in-law-firms/vincent-ai-review-artificial-intelligence-for-lawyers/">Lawyerist — Vincent AI review (2026)</a>.</li>
+      <li id="s-stanford">Error rates for grounded legal AI tools: Stanford RegLab / HAI, "Hallucination-Free? Assessing the Reliability of Leading AI Legal Research Tools" (reported in the <em>Journal of Empirical Legal Studies</em>, 2025) — Lexis+ AI 17%+ and Westlaw AI-Assisted Research 34%+ incorrect; general-purpose LLMs 69–88%. Figures as reported as of June 2026; confirm against the published study.</li>
+      <li id="s-halluc">Catalogue of AI-fabricated content in court filings: <a href="https://www.damiencharlotin.com/hallucinations/">AI Hallucination Cases Database — Damien Charlotin</a>.</li>
+      <li id="s-sanctions">Escalating sanctions for AI-invented citations: <a href="https://www.sternekessler.com/news-insights/insights/ai-ip-year-in-reviewai-hallucinations-in-court-filings-and-orders-a-2025-review-of-sanctions-across-the-courts-and-rule-proposals/">Sterne Kessler — AI hallucinations in court filings (2025 review)</a>; <a href="https://www.scientificamerican.com/article/why-lawyers-keep-citing-fake-cases-invented-by-ai/">Scientific American — Why lawyers keep citing fake AI cases</a>.</li>
+    </ol>
+    <p class="disclaimer">This is an educational explainer for law students, not legal advice. AI output — including from grounded legal platforms — must be independently verified before use in any client matter or court filing. Product features and the empirical figures above were current as of June 2026 and should be reconfirmed.</p>
+  </div>
+</footer>
+
+<!-- ===== teaching-explainer interaction kit (inlined for a single portable file) ===== -->
+<script>
+/* assets/components.js */
+(function () {
+  const registry = {};
+  function announce(msg) {
+    let live = document.getElementById('te-live');
+    if (!live) {
+      live = document.createElement('div');
+      live.id = 'te-live'; live.className = 'te-sr-only';
+      live.setAttribute('aria-live', 'polite'); live.setAttribute('role', 'status');
+      document.body.appendChild(live);
+    }
+    live.textContent = '';
+    requestAnimationFrame(() => { live.textContent = msg; });
+  }
+  function ensureLiveRegion(el) {
+    if (!el.getAttribute('role')) el.setAttribute('role', 'status');
+    if (!el.getAttribute('aria-live')) el.setAttribute('aria-live', 'polite');
+  }
+  function init(root) {
+    const scope = root || document;
+    scope.querySelectorAll('[data-te]').forEach((el) => {
+      const name = el.getAttribute('data-te');
+      if (registry[name] && !el.dataset.teReady) { registry[name](el); el.dataset.teReady = '1'; }
+    });
+  }
+  registry['predict-reveal'] = function (el) {
+    const btn = el.querySelector('.te-pr-reveal');
+    const answer = el.querySelector('.te-pr-answer');
+    if (!btn || !answer) return;
+    answer.setAttribute('tabindex', '-1');
+    btn.addEventListener('click', () => {
+      answer.hidden = false; btn.setAttribute('aria-expanded', 'true');
+      btn.disabled = true; answer.focus(); announce('Answer revealed');
+    });
+  };
+  const counted = new WeakSet();
+  function bumpTally(isCorrect, el) {
+    const tally = document.querySelector('[data-te-tally]');
+    if (!tally) return;
+    const alreadyCounted = el && counted.has(el);
+    if (el && !alreadyCounted) counted.add(el);
+    const c = +(tally.dataset.correct || 0) + (isCorrect ? 1 : 0);
+    const t = +(tally.dataset.total || 0) + (alreadyCounted ? 0 : 1);
+    tally.dataset.correct = c; tally.dataset.total = t;
+    tally.textContent = `Score: ${c} / ${t}`;
+  }
+  registry['retrieval-mc'] = function (el) {
+    const correct = el.getAttribute('data-answer');
+    const why = el.getAttribute('data-why') || '';
+    const check = el.querySelector('.te-mc-check');
+    const fb = el.querySelector('.te-mc-feedback');
+    ensureLiveRegion(fb);
+    let solved = false;
+    check.addEventListener('click', () => {
+      const picked = el.querySelector('input[type="radio"]:checked');
+      if (!picked) { fb.className = 'te-mc-feedback'; fb.textContent = 'Select an answer first.'; return; }
+      if (picked.value === correct) {
+        if (!solved) { solved = true; bumpTally(true, el); }
+        fb.className = 'te-mc-feedback te-correct'; fb.textContent = 'Correct — ' + why;
+      } else {
+        if (!solved) bumpTally(false, el);
+        fb.className = 'te-mc-feedback te-incorrect'; fb.textContent = 'Not quite — try again.';
+      }
+    });
+  };
+  registry['self-explain'] = function (el) {
+    const input = el.querySelector('.te-se-input');
+    const btn = el.querySelector('.te-se-reveal');
+    const model = el.querySelector('.te-se-model');
+    model.setAttribute('tabindex', '-1');
+    input.addEventListener('input', () => {
+      const ready = input.value.trim().length > 0;
+      btn.disabled = !ready; btn.setAttribute('aria-disabled', String(!ready));
+    });
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      model.hidden = false; model.focus(); announce('Model answer revealed');
+    });
+  };
+  registry['classify'] = function (el) {
+    const items = [...el.querySelectorAll('.te-cl-item')];
+    const cats = [...el.querySelectorAll('.te-cl-cat')];
+    const fb = el.querySelector('.te-cl-feedback');
+    ensureLiveRegion(fb);
+    let selected = null;
+    items.forEach((it) => {
+      it.setAttribute('aria-pressed', 'false');
+      it.addEventListener('click', () => {
+        if (it.getAttribute('aria-disabled') === 'true') return;
+        items.forEach((o) => o.setAttribute('aria-pressed', 'false'));
+        it.setAttribute('aria-pressed', 'true'); selected = it;
+      });
+    });
+    cats.forEach((cat) => {
+      cat.addEventListener('click', () => {
+        if (!selected) { fb.className = 'te-cl-feedback'; fb.textContent = 'Select an item first.'; return; }
+        const want = selected.getAttribute('data-cat');
+        if (want === cat.getAttribute('data-cat')) {
+          selected.setAttribute('aria-disabled', 'true');
+          selected.setAttribute('aria-pressed', 'false');
+          selected.classList.add('te-cl-done');
+          fb.className = 'te-cl-feedback te-correct';
+          fb.textContent = items.every((i) => i.getAttribute('aria-disabled') === 'true') ? 'All sorted.' : 'Correct.';
+          selected = null;
+        } else {
+          fb.className = 'te-cl-feedback te-incorrect';
+          fb.textContent = 'Not quite — that item is not ' + cat.textContent.toLowerCase() + '.';
+        }
+      });
+    });
+  };
+  registry['step-through'] = function (el) {
+    const steps = [...el.querySelectorAll('.te-st-step')];
+    const prog = el.querySelector('.te-st-progress');
+    const prev = el.querySelector('.te-st-prev');
+    const next = el.querySelector('.te-st-next');
+    ensureLiveRegion(prog);
+    let i = 0;
+    function render(focus) {
+      steps.forEach((s, j) => { s.hidden = j !== i; });
+      prog.textContent = `Step ${i + 1} of ${steps.length}`;
+      prev.disabled = i === 0; next.disabled = i === steps.length - 1;
+      if (focus) steps[i].querySelector('h3').focus();
+    }
+    prev.addEventListener('click', () => { if (i > 0) { i--; render(true); } });
+    next.addEventListener('click', () => { if (i < steps.length - 1) { i++; render(true); } });
+    render(false);
+  };
+  window.TE = { init, _registry: registry };
+  document.addEventListener('DOMContentLoaded', () => init(document));
+})();
+</script>
+<script>
+/* assets/review-mode.js — activate with ?edit or the data-review-toggle on <body> */
+(function () {
+  const active = new URLSearchParams(location.search).has('edit')
+    || document.body.hasAttribute('data-review-toggle');
+  if (!active) return;
+  let lastFocus = null;
+  const launch = document.createElement('button');
+  launch.type = 'button'; launch.className = 'te-btn';
+  launch.setAttribute('data-te-review-launch', '');
+  launch.setAttribute('aria-label', 'Review and edit this page');
+  launch.textContent = 'Review & edit';
+  launch.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9999;min-width:44px;min-height:44px;padding:10px 18px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);';
+  const dialog = document.createElement('div');
+  dialog.setAttribute('role', 'dialog'); dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', 'te-review-title'); dialog.setAttribute('tabindex', '-1');
+  dialog.hidden = true;
+  dialog.style.cssText = 'position:fixed;top:10%;left:50%;transform:translateX(-50%);max-width:480px;width:90%;background:#fff;color:#1a1a1a;border:2px solid #1d4ed8;border-radius:8px;padding:24px;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.2);';
+  let notes = [];
+  try { notes = JSON.parse(localStorage.getItem('te-review-notes') || '[]'); } catch (e) {}
+  function saveNotes() { try { localStorage.setItem('te-review-notes', JSON.stringify(notes)); } catch (e) {} }
+  function buildBrief() {
+    if (!notes.length) return '(no notes yet)';
+    let out = '# Revision requests\n(' + notes.length + ' annotation' + (notes.length === 1 ? '' : 's') + ')\n\n';
+    notes.forEach(function (n, i) { out += (i + 1) + '. ' + (n.loc || 'Page') + '\n   Note: ' + n.note + '\n\n'; });
+    out += 'Please apply these to the source HTML.';
+    return out;
+  }
+  function announce(msg) { const live = dialog.querySelector('[data-te-review-status]'); if (live) live.textContent = msg; }
+  function copyNotes() {
+    const text = buildBrief();
+    try { navigator.clipboard.writeText(text); announce('Notes copied to clipboard.'); }
+    catch (e) { announce('Copy failed; clipboard unavailable.'); }
+  }
+  function downloadEdits() {
+    let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    if (notes.length) {
+      const safe = buildBrief().replace(/<!--/g, '<!-').replace(/-->/g, '->').replace(/--/g, '—');
+      html += '\n\n<!-- REVIEWER NOTES\n\n' + safe + '\n\n-->\n';
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+    a.download = (document.title || 'page').replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '-edited.html';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 60000);
+    announce('Edited copy downloaded.');
+  }
+  function setMode(m) {
+    dialog.querySelectorAll('[data-te-mode]').forEach(function (b) {
+      const on = b.dataset.teMode === m;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.style.fontWeight = on ? '700' : '400';
+      b.style.background = on ? '#1d4ed8' : '#f1f5f9';
+      b.style.color = on ? '#fff' : '#1a1a1a';
+    });
+    document.querySelectorAll('[data-te-edit]').forEach(function (el) { el.contentEditable = (m === 'edit') ? 'true' : 'false'; });
+    const notePanel = dialog.querySelector('[data-te-review-note-panel]');
+    if (notePanel) notePanel.hidden = (m !== 'note');
+  }
+  function markEditable() {
+    const skip = '[role="dialog"],[data-te-review-launch],[contenteditable],[data-te-edit]';
+    const sel = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,figcaption,td,th';
+    document.querySelectorAll(sel).forEach(function (el) { if (!el.closest(skip)) el.setAttribute('data-te-edit', ''); });
+  }
+  dialog.innerHTML =
+    '<h2 id="te-review-title" style="margin:0 0 12px;font-size:18px;">Review &amp; edit</h2>' +
+    '<div role="group" aria-label="Mode" style="display:flex;gap:8px;margin-bottom:16px;">' +
+      '<button type="button" data-te-mode="preview" aria-pressed="true" style="min-height:36px;min-width:80px;padding:6px 14px;border:1px solid #1d4ed8;border-radius:6px;cursor:pointer;background:#1d4ed8;color:#fff;font-weight:700;">Preview</button>' +
+      '<button type="button" data-te-mode="edit" aria-pressed="false" style="min-height:36px;min-width:80px;padding:6px 14px;border:1px solid #1d4ed8;border-radius:6px;cursor:pointer;background:#f1f5f9;color:#1a1a1a;">Edit text</button>' +
+      '<button type="button" data-te-mode="note" aria-pressed="false" style="min-height:36px;min-width:80px;padding:6px 14px;border:1px solid #1d4ed8;border-radius:6px;cursor:pointer;background:#f1f5f9;color:#1a1a1a;">Add note</button>' +
+    '</div>' +
+    '<div data-te-review-note-panel hidden style="margin-bottom:16px;">' +
+      '<label for="te-review-note-input" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Note for the LLM</label>' +
+      '<textarea id="te-review-note-input" data-te-review-note-input rows="3" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #6b7280;border-radius:6px;font:inherit;font-size:13px;resize:vertical;" placeholder="What should change?"></textarea>' +
+      '<button type="button" data-te-review-note-save style="margin-top:8px;min-height:36px;padding:6px 14px;border:1px solid #1d4ed8;border-radius:6px;cursor:pointer;background:#1d4ed8;color:#fff;font-weight:600;">Save note</button>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button type="button" data-te-review-copy style="min-height:36px;padding:6px 14px;border:1px solid #6b7280;border-radius:6px;cursor:pointer;background:#f9fafb;color:#1a1a1a;">Copy notes for LLM</button>' +
+      '<button type="button" data-te-review-download style="min-height:36px;padding:6px 14px;border:1px solid #6b7280;border-radius:6px;cursor:pointer;background:#f9fafb;color:#1a1a1a;">Download edits</button>' +
+      '<button type="button" data-te-review-close style="min-height:36px;padding:6px 14px;border:1px solid #6b7280;border-radius:6px;cursor:pointer;background:#f9fafb;color:#1a1a1a;margin-left:auto;">Close</button>' +
+    '</div>' +
+    '<div data-te-review-status role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;"></div>';
+  function focusables() {
+    return Array.prototype.slice.call(
+      dialog.querySelectorAll('button:not([disabled]),[href]:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')
+    ).filter(function (el) { return el.getClientRects().length > 0 || el === document.activeElement; });
+  }
+  function saveNote() {
+    const ta = dialog.querySelector('[data-te-review-note-input]');
+    const text = (ta.value || '').trim();
+    if (!text) { announce('Note is empty.'); ta.focus(); return; }
+    notes.push({ loc: document.title || 'Page', note: text });
+    saveNotes(); ta.value = ''; announce('Note saved. ' + notes.length + ' total.'); ta.focus();
+  }
+  function openDialog() {
+    lastFocus = document.activeElement; markEditable(); dialog.hidden = false;
+    const first = focusables()[0]; if (first) first.focus(); else dialog.focus();
+  }
+  function closeDialog() { dialog.hidden = true; setMode('preview'); if (lastFocus) lastFocus.focus(); }
+  dialog.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeDialog(); return; }
+    if (e.key === 'Tab') {
+      const f = focusables(); if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+      else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+    }
+  });
+  dialog.querySelectorAll('[data-te-mode]').forEach(function (b) { b.addEventListener('click', function () { setMode(b.dataset.teMode); }); });
+  dialog.querySelector('[data-te-review-note-save]').addEventListener('click', saveNote);
+  dialog.querySelector('[data-te-review-copy]').addEventListener('click', copyNotes);
+  dialog.querySelector('[data-te-review-download]').addEventListener('click', downloadEdits);
+  dialog.querySelector('[data-te-review-close]').addEventListener('click', closeDialog);
+  launch.addEventListener('click', openDialog);
+  document.body.appendChild(launch); document.body.appendChild(dialog);
+  if (new URLSearchParams(location.search).has('edit') && !document.body.hasAttribute('data-review-toggle')) openDialog();
+  window.TEReview = { open: openDialog, close: closeDialog };
+})();
+</script>
+</body>
+</html>
