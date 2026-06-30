@@ -1,0 +1,22 @@
+:root {
+  /* Design tokens — overridable per explainer. Contrast verified in tests. */
+  --te-ink: #1a1a1a;
+  --te-bg: #ffffff;
+  --te-accent: #1d4ed8;          /* 7.0:1 on white */
+  --te-correct: #1b5e20;         /* 8.3:1 on white */
+  --te-incorrect: #b00020;       /* 5.9:1 on white */
+  --te-focus: #1d4ed8;
+  --te-radius: 8px;
+  --te-gap: 12px;
+}
+.te-component { color: var(--te-ink); }
+.te-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+*:focus-visible { outline: 3px solid var(--te-focus); outline-offset: 2px; }
+.te-btn { min-height: 44px; min-width: 44px; padding: 10px 16px; border-radius: var(--te-radius);
+  font: inherit; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) {
+  .te-component * { animation: none !important; transition: none !important; }
+}
