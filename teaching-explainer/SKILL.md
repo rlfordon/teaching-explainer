@@ -1,6 +1,6 @@
 ---
 name: teaching-explainer
-description: Build a polished, accessible, single-page interactive teaching explainer — a lesson, class activity, or educational walkthrough — for any subject and any course. Use when an instructor wants to make an active lesson page, interactive explainer, teaching activity, or classroom handout that students can work through on their own or in class — emphasizing evidence-based pedagogy (constructive interactions, spaced retrieval, no decorative noise), WCAG 2.2 AA accessibility by construction, and an organizing structure fit to the content rather than forced onto it. Triggers on requests like "make a lesson / interactive explainer for my class," "turn this topic into a teaching page," "create a class activity / interactive reading," "build something students can work through before/after lecture," or "make an interactive explainer for [law / science / history / any course]."
+description: Build a polished, accessible, single-page interactive teaching explainer — a lesson, class activity, or educational walkthrough — for any subject and any course. Use when an instructor wants to make an active lesson page, interactive explainer, teaching activity, or classroom handout that students can work through on their own or in class — emphasizing evidence-based pedagogy (constructive interactions, spaced retrieval, no decorative noise), WCAG 2.2 AA accessibility by construction, and an organizing structure fit to the content rather than forced onto it. Triggers on requests like "make a lesson / interactive explainer for my class," "turn this topic into a teaching page," "create a class activity / interactive reading," "build something students can work through before/after lecture," "make an interactive explainer for [law / science / history / any course]," "help me teach the concept of X," "build a concept-based or doctrinal teaching activity," or "create an interactive explainer for a doctrine / legal rule / scientific concept."
 ---
 
 # Teaching Explainer
@@ -218,16 +218,22 @@ appears by default.
 
 All five kit components are initialized by `assets/components.js` automatically on
 `DOMContentLoaded`. Add `data-te="<name>"` to the container element. Each component is
-keyboard-operable, screen-reader-announced via ARIA live region (`#te-live`),
-`prefers-reduced-motion`-aware, and enforces ≥24×24 px targets via design tokens.
+keyboard-operable, screen-reader-announced via its own ARIA live region (applied by the kit
+during init — no author markup required), `prefers-reduced-motion`-aware, and enforces
+≥24×24 px targets via design tokens.
+
+`predict-reveal` and `self-explain` announce through the global `#te-live` region.
+`retrieval-mc`, `classify`, and `step-through` use their own feedback/progress element as the
+live region (the kit sets `role="status"` and `aria-live="polite"` on those elements during
+init, so the guarantee holds even if the author omits those attributes from markup).
 
 | Component | `data-te` value | Required interior elements | Key attributes |
 |---|---|---|---|
 | Predict-then-reveal | `predict-reveal` | `.te-pr-reveal` (button), `.te-pr-answer` (hidden answer) | — |
-| Multiple-choice retrieval check | `retrieval-mc` | `input[type="radio"]` options, `.te-mc-check` (button), `.te-mc-feedback` | `data-answer` (correct radio value), `data-why` (explanation text) |
+| Multiple-choice retrieval check | `retrieval-mc` | `input[type="radio"]` options, `.te-mc-check` (button), `.te-mc-feedback` | `data-answer` (correct radio value), `data-why` (explanation text). Kit sets `role="status" aria-live="polite"` on `.te-mc-feedback` during init. |
 | Self-explain → model answer | `self-explain` | `.te-se-input` (textarea), `.te-se-reveal` (button), `.te-se-model` (hidden model answer) | — |
-| Classify / sort | `classify` | `.te-cl-item` elements (items to sort), `.te-cl-cat` elements (target categories), `.te-cl-feedback` | `data-cat` on each item and each category (matching value = correct placement) |
-| Step-through / sequence-builder | `step-through` | `.te-st-step` elements (one per step), `.te-st-progress`, `.te-st-prev` (button), `.te-st-next` (button) | — |
+| Classify / sort | `classify` | `.te-cl-item` elements (items to sort), `.te-cl-cat` elements (target categories), `.te-cl-feedback` | `data-cat` on each item and each category (matching value = correct placement). Kit sets `role="status" aria-live="polite"` on `.te-cl-feedback` during init. |
+| Step-through / sequence-builder | `step-through` | `.te-st-step` elements (one per step), `.te-st-progress`, `.te-st-prev` (button), `.te-st-next` (button) | Kit sets `role="status" aria-live="polite"` on `.te-st-progress` during init. |
 
 `review-mode.js` (`assets/review-mode.js`) is our a11y-hardened copy of the edit overlay,
 owned outright. Activated by `?edit` query parameter or `<body data-review-toggle>`. Provides
@@ -256,7 +262,7 @@ In addition, before declaring done, run a quick pedagogy pre-flight layered on t
 - [ ] No decorative imagery, gratuitous animation, or ornamental text that doesn't carry
       instructional meaning.
 - [ ] Mode is correctly implemented: async (feedback fires immediately) or in-class (reveals
-      held; instructor-controlled; projection-friendly).
+      held via bespoke per-page wiring; projection-friendly type; no kit-level hold attribute).
 
 ---
 
@@ -368,13 +374,14 @@ This is fully self-contained — no instructor needed to operate the page.
 
 A flag, not a rewrite. Same file; same components. Differences:
 
-- **Reveals withheld by default.** Predict-reveal and classify components start with reveals
-  held; the instructor clicks "Reveal" after asking the room. (Set `data-te-hold-reveal` on
-  the component container.)
+- **Reveals withheld by default.** Predict-reveal and classify components can start with
+  reveals held so the instructor asks the room first. This is bespoke per-explainer work:
+  the generating model wires up the hold logic (hiding the answer element, adding a reveal
+  button, etc.) to suit the specific page. The kit does not provide a `data-te-hold-reveal`
+  attribute or a "Reveal all" control — those are left to per-page implementation because
+  in-class flow varies too much for a generic kit primitive.
 - **Projection-friendly type.** Larger base font size (recommend ≥18px base); high-contrast
   palette; minimal peripheral chrome.
-- **Optional "Reveal all" control.** A single button the instructor can use to fire all
-  held reveals at once at the end of a discussion.
 - **Retrieval checks.** Can be run synchronously (all students answer, instructor reveals);
   polling is out of scope for v1 (no backend, no FERPA exposure).
 

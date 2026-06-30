@@ -38,3 +38,10 @@ test('no axe violations after feedback shown', async ({ page }) => {
   await page.locator('.te-mc-check').click();
   expect((await runAxe(page, '#root')).violations).toEqual([]);
 });
+
+test('kit adds role=status and aria-live to .te-mc-feedback by construction', async ({ page }) => {
+  await page.goto(fixture);
+  const fb = page.locator('.te-mc-feedback');
+  await expect(fb).toHaveAttribute('role', 'status');
+  await expect(fb).toHaveAttribute('aria-live', 'polite');
+});

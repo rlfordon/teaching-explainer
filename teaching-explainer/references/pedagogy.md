@@ -18,7 +18,7 @@ These rules are defaults that the skill enforces on every generated explainer. E
 
 ### Rule 2 — Include ≥1 Constructive interaction per concept
 
-**Evidence basis:** ICAP framework (Chi & Wylie 2014) — Constructive activity (generating beyond what is given) produces learning gains above passive or merely active engagement. Freeman et al. (2014, PNAS, N=225 studies) showed active learning raised exam performance +0.47 SD and cut failure rates from 33.8% to 21.8%.
+**Evidence basis:** ICAP framework (Chi & Wylie 2014) — Constructive activity (generating beyond what is given) produces learning gains above passive or merely active engagement. Freeman et al. (2014, PNAS, N=225 studies) showed active learning raised exam performance +0.47 SD and cut failure rates from 33.8% to 21.8%. Burch et al. (2019, JLE) found that experiential, active learning approaches in legal education yielded d ≈ 0.43 gains over passive formats, corroborating the active/constructive advantage in law-school-specific contexts.
 
 **How to apply:** Every concept section must include at least one `predict-reveal`, `self-explain`, or `classify` component. A `step-through` that requires the learner to predict the next step before advancing also qualifies. A read-through with no generative prompt does not satisfy this rule.
 

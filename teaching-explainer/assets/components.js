@@ -3,6 +3,10 @@
 (function () {
   const registry = {}; // name -> init(el)
 
+  // Global live region used by predict-reveal and self-explain.
+  // NOTE: retrieval-mc, classify, and step-through use their own feedback/progress
+  // element as the live region (set by ensureLiveRegion below) to avoid double-announcement.
+  // These two announce() functions are deliberately separate — do not unify them.
   function announce(msg) {
     let live = document.getElementById('te-live');
     if (!live) {
@@ -15,6 +19,14 @@
     }
     live.textContent = '';
     requestAnimationFrame(() => { live.textContent = msg; });
+  }
+
+  // Ensure an element IS its own ARIA live region by construction.
+  // Called during init so the kit guarantees screen-reader announcement
+  // regardless of whether the author included role/aria-live in markup.
+  function ensureLiveRegion(el) {
+    if (!el.getAttribute('role')) el.setAttribute('role', 'status');
+    if (!el.getAttribute('aria-live')) el.setAttribute('aria-live', 'polite');
   }
 
   function init(root) {
@@ -63,10 +75,11 @@
     const why = el.getAttribute('data-why') || '';
     const check = el.querySelector('.te-mc-check');
     const fb = el.querySelector('.te-mc-feedback');
+    ensureLiveRegion(fb); // guarantee live region by construction; no double-announce via #te-live
     let solved = false;
     check.addEventListener('click', () => {
       const picked = el.querySelector('input[type="radio"]:checked');
-      if (!picked) { fb.textContent = 'Select an answer first.'; return; }
+      if (!picked) { fb.className = 'te-mc-feedback'; fb.textContent = 'Select an answer first.'; return; }
       if (picked.value === correct) {
         if (!solved) { solved = true; bumpTally(true, el); }
         fb.className = 'te-mc-feedback te-correct';
@@ -99,6 +112,7 @@
     const items = [...el.querySelectorAll('.te-cl-item')];
     const cats = [...el.querySelectorAll('.te-cl-cat')];
     const fb = el.querySelector('.te-cl-feedback');
+    ensureLiveRegion(fb); // guarantee live region by construction; no double-announce via #te-live
     let selected = null;
     items.forEach((it) => {
       it.setAttribute('aria-pressed', 'false');
@@ -111,7 +125,7 @@
     });
     cats.forEach((cat) => {
       cat.addEventListener('click', () => {
-        if (!selected) { fb.textContent = 'Select an item first.'; return; }
+        if (!selected) { fb.className = 'te-cl-feedback'; fb.textContent = 'Select an item first.'; return; }
         const want = selected.getAttribute('data-cat');
         if (want === cat.getAttribute('data-cat')) {
           selected.setAttribute('aria-disabled', 'true');
@@ -134,6 +148,7 @@
     const prog = el.querySelector('.te-st-progress');
     const prev = el.querySelector('.te-st-prev');
     const next = el.querySelector('.te-st-next');
+    ensureLiveRegion(prog); // guarantee live region by construction; no double-announce via #te-live
     let i = 0;
     function render(focus) {
       steps.forEach((s, j) => { s.hidden = j !== i; });

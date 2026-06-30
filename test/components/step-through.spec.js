@@ -23,3 +23,10 @@ test('no axe violations on each step', async ({ page }) => {
   await page.locator('.te-st-next').click();
   expect((await runAxe(page, '#root')).violations).toEqual([]);
 });
+
+test('kit adds role=status and aria-live to .te-st-progress by construction', async ({ page }) => {
+  await page.goto(fixture);
+  const prog = page.locator('.te-st-progress');
+  await expect(prog).toHaveAttribute('role', 'status');
+  await expect(prog).toHaveAttribute('aria-live', 'polite');
+});

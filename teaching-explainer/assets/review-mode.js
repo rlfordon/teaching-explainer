@@ -54,6 +54,8 @@
     return out;
   }
 
+  // Deliberately separate from components.js announce() (global #te-live) — this one
+  // is scoped to the review dialog's own status region to avoid cross-contamination.
   function announce(msg) {
     const live = dialog.querySelector('[data-te-review-status]');
     if (live) live.textContent = msg;

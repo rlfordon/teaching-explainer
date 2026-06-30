@@ -2,10 +2,11 @@
 
 A Claude Code skill that builds polished, accessible, single-page interactive teaching
 explainers — lessons, class activities, or educational walkthroughs — for any subject and any
-course. It runs a six-phase process (scope, architecture, visual design, build, QA, revise)
-with an enforced evidence-based pedagogy spine: active interactions by default, spaced
-retrieval checks with instructional why-feedback, WCAG 2.2 AA accessibility by construction,
-and an organizing structure fit to the content rather than forced onto it.
+course. It runs a seven-phase process (Phase 0 scope, Phase 1 architecture, Phase 2 visual
+design, Phase 3 build, Phase 4 quality loop, Phase 5 pedagogy + accessibility QA gate,
+Phase 6 revise) with an enforced evidence-based pedagogy spine: active interactions by
+default, spaced retrieval checks with instructional why-feedback, WCAG 2.2 AA accessibility
+by construction, and an organizing structure fit to the content rather than forced onto it.
 
 ---
 
@@ -22,7 +23,7 @@ cp -r /path/to/html-pedagogy/teaching-explainer ~/.claude/skills/teaching-explai
 
 # Windows (PowerShell, run as Administrator) — junction
 New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\teaching-explainer" `
-         -Target "C:\Users\Rebecca Fordon\Projects\html-pedagogy\teaching-explainer"
+         -Target "<path-to-repo>\html-pedagogy\teaching-explainer"
 ```
 
 The skill is then invoked like any other skill — trigger phrases include:
@@ -123,23 +124,28 @@ is documented in `references/accessibility.md` §5.
 
 All five kit components are initialized by `assets/components.js` automatically on
 `DOMContentLoaded`. Add `data-te="<name>"` to the container element. Each component is
-keyboard-operable, screen-reader-announced via the ARIA live region (`#te-live`),
-`prefers-reduced-motion`-aware, and enforces ≥24×24 px targets via design tokens.
+keyboard-operable, screen-reader-announced via its own ARIA live region (applied by the kit
+during init — no author markup required), `prefers-reduced-motion`-aware, and enforces
+≥24×24 px targets via design tokens.
+
+`predict-reveal` and `self-explain` announce through the global `#te-live` region.
+`retrieval-mc`, `classify`, and `step-through` use their own feedback/progress element as the
+live region (the kit sets `role="status"` and `aria-live="polite"` on those elements during
+init, so the guarantee holds even if the author omits those attributes from markup).
 
 | Component | `data-te` value | Required interior elements | Key attributes |
 |---|---|---|---|
 | Predict-then-reveal | `predict-reveal` | `.te-pr-reveal` (button), `.te-pr-answer` (hidden answer) | — |
-| Multiple-choice retrieval check | `retrieval-mc` | `input[type="radio"]` options, `.te-mc-check` (button), `.te-mc-feedback` | `data-answer` (correct radio value), `data-why` (explanation text) |
+| Multiple-choice retrieval check | `retrieval-mc` | `input[type="radio"]` options, `.te-mc-check` (button), `.te-mc-feedback` | `data-answer` (correct radio value), `data-why` (explanation text). Kit sets `role="status" aria-live="polite"` on `.te-mc-feedback` during init. |
 | Self-explain → model answer | `self-explain` | `.te-se-input` (textarea), `.te-se-reveal` (button), `.te-se-model` (hidden model answer) | — |
-| Classify / sort | `classify` | `.te-cl-item` elements (items to sort), `.te-cl-cat` elements (target categories), `.te-cl-feedback` | `data-cat` on each item and each category (matching value = correct placement) |
-| Step-through / sequence-builder | `step-through` | `.te-st-step` elements (one per step), `.te-st-progress`, `.te-st-prev` (button), `.te-st-next` (button) | — |
+| Classify / sort | `classify` | `.te-cl-item` elements (items to sort), `.te-cl-cat` elements (target categories), `.te-cl-feedback` | `data-cat` on each item and each category (matching value = correct placement). Kit sets `role="status" aria-live="polite"` on `.te-cl-feedback` during init. |
+| Step-through / sequence-builder | `step-through` | `.te-st-step` elements (one per step), `.te-st-progress`, `.te-st-prev` (button), `.te-st-next` (button) | Kit sets `role="status" aria-live="polite"` on `.te-st-progress` during init. |
 
 ### Review overlay
 
 `assets/review-mode.js` is our a11y-hardened copy of the edit overlay, owned outright.
 
-- **Activate:** append `?edit` to the URL, or add `<body data-review-toggle>` so the
-  "Review & edit" launcher appears by default.
+- **Activate:** `?edit` in the URL auto-opens the dialog immediately. `<body data-review-toggle>` makes the "Review & edit" launcher button visible on the page (click it to open). Precedence: when `data-review-toggle` is present, the launcher is shown and `?edit` does not additionally auto-open — click the launcher to open the dialog instead.
 - **Controls:** Preview / Edit text / Add note / Download edits / Copy notes for LLM.
 - **Score tally:** add a `[data-te-tally]` element anywhere on the page to display a running
   correct/total tally across all `retrieval-mc` components.

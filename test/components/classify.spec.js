@@ -34,3 +34,10 @@ test('sorting all items shows completion; no axe violations', async ({ page }) =
   await expect(page.locator('.te-cl-feedback')).toHaveText('All sorted.');
   expect((await runAxe(page, '#root')).violations).toEqual([]);
 });
+
+test('kit adds role=status and aria-live to .te-cl-feedback by construction', async ({ page }) => {
+  await page.goto(fixture);
+  const fb = page.locator('.te-cl-feedback');
+  await expect(fb).toHaveAttribute('role', 'status');
+  await expect(fb).toHaveAttribute('aria-live', 'polite');
+});
