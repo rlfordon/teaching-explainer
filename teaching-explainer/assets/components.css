@@ -22,6 +22,11 @@
 .te-pr-reveal[aria-expanded="true"] { opacity: .6; }
 .te-pr-answer { margin-top: var(--te-gap); padding: 12px; border-left: 4px solid var(--te-accent);
   background: #f3f4f6; color: var(--te-ink); }
+.te-mc { border: 1px solid #6b7280; border-radius: var(--te-radius); padding: 16px; }
+.te-mc-opt { display: block; min-height: 44px; padding: 8px 4px; }
+.te-mc-feedback:empty { display: none; }
+.te-correct { color: var(--te-correct); font-weight: 600; }
+.te-incorrect { color: var(--te-incorrect); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
   .te-component * { animation: none !important; transition: none !important; }
 }
