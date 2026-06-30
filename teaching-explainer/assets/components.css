@@ -33,6 +33,11 @@
 .te-se-reveal[disabled] { opacity:.5; cursor:not-allowed; }
 .te-se-model { margin-top: var(--te-gap); padding:12px; border-left:4px solid var(--te-accent);
   background:#f3f4f6; }
+.te-cl-items { list-style:none; padding:0; display:flex; flex-wrap:wrap; gap: var(--te-gap); }
+.te-cl-item[aria-pressed="true"] { outline: 3px solid var(--te-accent); }
+.te-cl-item.te-cl-done { background:#e8f5e9; color: var(--te-correct); }
+.te-cl-cats { display:flex; gap: var(--te-gap); margin: var(--te-gap) 0; }
+.te-cl-feedback:empty { display:none; }
 @media (prefers-reduced-motion: reduce) {
   .te-component * { animation: none !important; transition: none !important; }
 }

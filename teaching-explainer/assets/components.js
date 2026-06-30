@@ -95,6 +95,40 @@
     });
   };
 
+  registry['classify'] = function (el) {
+    const items = [...el.querySelectorAll('.te-cl-item')];
+    const cats = [...el.querySelectorAll('.te-cl-cat')];
+    const fb = el.querySelector('.te-cl-feedback');
+    let selected = null;
+    items.forEach((it) => {
+      it.setAttribute('aria-pressed', 'false');
+      it.addEventListener('click', () => {
+        if (it.getAttribute('aria-disabled') === 'true') return;
+        items.forEach((o) => o.setAttribute('aria-pressed', 'false'));
+        it.setAttribute('aria-pressed', 'true');
+        selected = it;
+      });
+    });
+    cats.forEach((cat) => {
+      cat.addEventListener('click', () => {
+        if (!selected) { fb.textContent = 'Select an item first.'; return; }
+        const want = selected.getAttribute('data-cat');
+        if (want === cat.getAttribute('data-cat')) {
+          selected.setAttribute('aria-disabled', 'true');
+          selected.setAttribute('aria-pressed', 'false');
+          selected.classList.add('te-cl-done');
+          fb.className = 'te-cl-feedback te-correct';
+          fb.textContent = items.every((i) => i.getAttribute('aria-disabled') === 'true')
+            ? 'All sorted.' : 'Correct.';
+          selected = null;
+        } else {
+          fb.className = 'te-cl-feedback te-incorrect';
+          fb.textContent = 'Not quite — that item is not ' + cat.textContent.toLowerCase() + '.';
+        }
+      });
+    });
+  };
+
   window.TE = { init, _registry: registry };
   document.addEventListener('DOMContentLoaded', () => init(document));
 })();

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TE fixture</title>
+  <link rel="stylesheet" href="../../teaching-explainer/assets/components.css">
+</head>
+<body>
+  <main id="root">
+    <div data-te="classify" class="te-component te-cl">
+      <ul class="te-cl-items">
+        <li><button type="button" class="te-btn te-cl-item" data-cat="secondary">A law review article</button></li>
+        <li><button type="button" class="te-btn te-cl-item" data-cat="primary">A state statute</button></li>
+      </ul>
+      <div class="te-cl-cats">
+        <button type="button" class="te-btn te-cl-cat" data-cat="primary">Primary</button>
+        <button type="button" class="te-btn te-cl-cat" data-cat="secondary">Secondary</button>
+      </div>
+      <p class="te-cl-feedback" role="status" aria-live="polite"></p>
+    </div>
+  </main>
+  <script src="../../teaching-explainer/assets/components.js"></script>
+</body>
+</html>
