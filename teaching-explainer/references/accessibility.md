@@ -60,7 +60,7 @@ applies to the whole page.
 | 3.3.1 | Error Identification (A) | Input errors are described in text. | If any interaction involves typed input (self-explain free text, search-query builder), invalid states must be identified with a text error message, not color alone. |
 | 3.3.2 | Labels or Instructions (A) | Labels or instructions are provided for required inputs. | Text inputs and interactive tasks must have visible labels or clear prompt text. |
 | 3.3.7 | Redundant Entry (A) | Users are not asked to re-enter information already provided in the same session. | If the explainer uses multi-step flows or multi-part questions that re-use an earlier answer, that answer must be pre-populated or displayed — not re-requested. |
-| 3.3.8 | Accessible Authentication (AA) | Cognitive function tests are not required to log in or complete a security check. | Explainers are self-contained and require no login. If any future version adds an authentication wall, it must not rely on a cognitive puzzle (CAPTCHA, puzzle, memory test) as the only path. |
+| 3.3.8 | Accessible Authentication (Minimum) (AA) | Cognitive function tests are not required to log in or complete a security check. | Explainers are self-contained and require no login. If any future version adds an authentication wall, it must not rely on a cognitive puzzle (CAPTCHA, puzzle, memory test) as the only path. |
 
 ### Robust
 
@@ -77,9 +77,12 @@ applies to the whole page.
 kit components. You do not need to re-implement these; you need to supply correct content
 (meaningful alt text, appropriate question prompts) and verify the Phase-5 checklist.
 
-`npm test` runs Playwright + axe-core against the built explainer and automatically verifies
-WCAG compliance for any criterion that axe-core can detect programmatically. A passing test
-run clears the automated half of the QA gate.
+`npm test` runs Playwright + axe-core against the built explainer and catches many WCAG
+violations programmatically. But axe is a static/attribute checker — it cannot confirm real
+keyboard operation, that a non-drag alternative actually completes a task, reading order,
+meaningful alt text, or target size and contrast for arbitrary custom components. Those are
+MANUAL (see §4). A passing `npm test` clears the automated half of the QA gate only; the
+manual checklist items in §5 must still be completed.
 
 ---
 
@@ -129,14 +132,13 @@ Automated (npm test / axe-core):
 [ ] [auto]  1.1.1  alt present on all non-text content
 [ ] [auto]  1.4.3  text contrast ≥ 4.5:1 body, ≥ 3:1 large
 [ ] [auto]  1.4.11 UI component contrast ≥ 3:1
-[ ] [auto]  2.1.1  all interactions keyboard-operable
-[ ] [auto]  2.1.2  no keyboard trap
+[ ] [auto]  2.1.1  interactive elements have proper roles/tabindex (attribute check only)
+[ ] [auto]  2.1.2  no keyboard trap (attribute heuristics)
 [ ] [auto]  2.4.3  focus order in DOM
 [ ] [auto]  2.4.7  visible focus indicator present
 [ ] [auto]  2.4.11 focus not fully obscured by sticky header/overlay
 [ ] [auto]  2.5.3  accessible name contains visible label text
-[ ] [auto]  2.5.7  drag operations have pointer alternative
-[ ] [auto]  2.5.8  all targets ≥ 24×24 CSS px
+[ ] [auto]  2.5.8  kit components ≥ 24×24px (enforced via design tokens, axe target-size rule)
 [ ] [auto]  3.1.1  <html lang="..."> set
 [ ] [auto]  3.3.2  inputs have labels/instructions
 [ ] [auto]  4.1.2  ARIA roles, names, states correct
@@ -144,6 +146,9 @@ Automated (npm test / axe-core):
 [ ] [auto]  Zoom to 200%: no content clipped (1.4.4, 1.4.12)
 
 Manual review required:
+[ ] [manual] 2.1.1  full keyboard walkthrough — every interaction activatable via keyboard, no trap
+[ ] [manual] 2.5.7  click/keyboard non-drag path actually completes the classify task
+[ ] [manual] 2.5.8  custom/per-explainer components measured ≥ 24×24px
 [ ] [manual] 1.1.1  alt text conveys instructional meaning (not redundant, not filename)
 [ ] [manual] 2.4.3  reading order makes sense by tab sequence alone
 [ ] [manual] 2.4.7  focus ring visible with custom theme colors (not suppressed)
