@@ -312,6 +312,14 @@ source as a comment):
 - [ ] **Each retrieval check has `data-why` text** — the explanation of the correct answer,
       in instructional prose. (`references/pedagogy.md` Rule 6)
 - [ ] **Retry path is functional** — incorrect answers allow re-attempt.
+- [ ] **Self-contained — no unexplained jargon or inside references** — every term of art is
+      defined or put in plain language on first use; no in-jokes, and no metaphor, allusion, or
+      reference that assumes context not present on the page (e.g., "cargo cult," a named class
+      exercise, an unexplained acronym, a niche domain idiom). **Test:** a newcomer with no outside
+      context can read every sentence and understand it. When in doubt, cut the clever reference or
+      gloss it in a few plain words. Do a dedicated fresh-eyes pass for this — jargon is invisible
+      to the author who knows what it means. (`references/pedagogy.md` Rule 5 — plain, conversational
+      language.)
 - [ ] **No decorative elements** — no ornamental stock imagery, no purely aesthetic
       animations, no background textures, no icon sets that don't carry instructional meaning.
       (`references/pedagogy.md` Rule 4)

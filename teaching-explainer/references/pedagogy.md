@@ -46,6 +46,8 @@ These rules are defaults that the skill enforces on every generated explainer. E
 
 **How to apply:** Write generated prose in second-person, plain language ("When you search for a case…" not "When the researcher searches…"). Include a diagram, timeline, or annotated example *only* when it conveys structure the prose cannot — citation anatomy, a search-syntax tree, a procedural sequence. Do not add a visual simply to break up text.
 
+**Plain language means self-contained, too.** Define or replace every term of art on first use, and cut inside references — in-jokes, unexplained acronyms, niche idioms, or allusions that assume context not on the page (e.g., "cargo cult"). A reader with no outside context should understand every sentence. Jargon is invisible to the author who knows what it means, so the Phase 5 gate runs a dedicated fresh-eyes pass for this.
+
 ---
 
 ### Rule 6 — Feedback teaches; it does not just evaluate
