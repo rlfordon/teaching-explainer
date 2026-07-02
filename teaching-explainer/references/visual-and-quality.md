@@ -90,7 +90,8 @@ Re-read your output and fix every one of these — each is a blocker:
 - [ ] **No other slop tells** — no decorative/iridescent gradients, no rainbow text/rows, no 2×2
       bento grid of identical soft-shadow cards, no drop-shadow-on-everything.
 - [ ] **Palette isn't the templated default** (cream + lone rust/orange accent); ≥1 accent
-      subject-derived, color semantic.
+      subject-derived, color semantic — **and visually distinct from your other explainers** (don't
+      reuse a prior stylesheet; see `themes.md`).
 - [ ] **Bespoke theme not a costume** — if a topic-matched theme was used, it's an accent, not a
       full reskin: body text and UI controls stay clean and readable; theme tokens appear in the
       hero/display only.

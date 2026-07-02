@@ -191,10 +191,19 @@ decorative gradients, no bento grids, no generic SaaS texture); variety with rhy
 and space; horizontal use of the page; motion with purpose; and contrast per surface. (If you
 also use html-explainer, its Phase 2 covers the same ground in more depth — optional.)
 
+**Choose a distinct visual identity for this explainer.** Start from a preset in
+[`references/themes.md`](references/themes.md) (editorial-navy, technical-teal, warm-scholarly,
+slate-minimalist) or build a subject-matched one, then tweak the accent to fit the topic. **Never
+reuse a previous explainer's stylesheet wholesale** — two explainers in the same course must not
+look like twins (pick a different preset than the last one, or derive the accent from the subject).
+The biggest cheap levers for a distinct feel: serif vs. sans display, the accent hue, the paper
+tint, and the section treatment.
+
 Assemble with our kit by including `assets/components.css` (our interaction styles and design
 tokens) alongside your bespoke page CSS. All design tokens (color, spacing, type scale) go
-in `:root` CSS variables. The component kit uses these tokens; custom themes inherit them
-automatically. Do not scatter magic numbers.
+in `:root` CSS variables — the whole page, kit components included, reskins by swapping that token
+block. The component kit uses these tokens; themes inherit them automatically. Do not scatter
+magic numbers.
 
 ---
 

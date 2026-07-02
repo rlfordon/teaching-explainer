@@ -6,18 +6,19 @@
 <title>Boolean Searching for Legal Research</title>
 <style>
   :root{
-    --paper:#fcfcfa; --ink:#17181b; --muted:#586070; --line:#e7e6e0;
-    --band:#f4f3ee; --navy:#1d4ed8; --navy-ink:#1b3aa8; --navy-tint:#eef2ff;
-    --gold:#845c00; --gold-tint:#fbf3df; --gold-line:#ecd9a3;
-    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    /* Theme: "technical teal" — sans display + teal/coral, distinct from the AI explainer's editorial-navy serif */
+    --paper:#f8fbfb; --ink:#0f1720; --muted:#4b5563; --line:#e3e8ec;
+    --band:#edf4f3; --navy:#0f766e; --navy-ink:#115e59; --navy-tint:#d7f2ee;
+    --gold:#c2410c; --gold-tint:#fff1ea; --gold-line:#f4c7ae;
+    --serif:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
     --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
     --maxw:1160px; --prose:66ch;
-    --shadow-sm:0 1px 2px rgba(20,22,30,.05),0 2px 6px rgba(20,22,30,.05);
-    --shadow-md:0 6px 22px rgba(20,22,30,.09);
+    --shadow-sm:0 1px 2px rgba(15,23,32,.05),0 2px 6px rgba(15,23,32,.05);
+    --shadow-md:0 6px 22px rgba(15,23,32,.09);
     --r:12px; --r-lg:16px;
-    --te-ink:#17181b; --te-bg:#fff; --te-accent:#1d4ed8; --te-correct:#1b5e20;
-    --te-incorrect:#b00020; --te-focus:#1d4ed8; --te-radius:10px; --te-gap:12px;
+    --te-ink:#0f1720; --te-bg:#fff; --te-accent:#0f766e; --te-correct:#1b5e20;
+    --te-incorrect:#b00020; --te-focus:#0f766e; --te-radius:10px; --te-gap:12px;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth;scroll-padding-top:70px}
@@ -26,7 +27,7 @@
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
   .prose{max-width:var(--prose)}
   p{margin:0 0 1em}
-  h1,h2,h3,h4{font-family:var(--serif);color:var(--ink)}
+  h1,h2,h3,h4{font-family:var(--serif);color:var(--ink);font-weight:700;letter-spacing:-.01em}
   h2{font-size:clamp(1.65rem,3vw,2.15rem);line-height:1.13;margin:0 0 .35em;letter-spacing:-.012em}
   h3{font-size:1.2rem;line-height:1.25;margin:1.3em 0 .3em}
   a{color:var(--navy-ink);text-underline-offset:2px}
@@ -39,7 +40,7 @@
     background:radial-gradient(120% 130% at 0% 0%, #ffffff, var(--band))}
   .hero-inner{padding:72px 0 44px}
   .eyebrow{font-family:var(--sans);text-transform:uppercase;letter-spacing:.1em;font-size:.75rem;font-weight:700;color:var(--navy);margin:0 0 16px}
-  h1{font-family:var(--serif);font-size:clamp(2.2rem,5.5vw,3.4rem);line-height:1.05;letter-spacing:-.015em;margin:0 0 .3em}
+  h1{font-family:var(--serif);font-size:clamp(2.2rem,5.5vw,3.4rem);line-height:1.05;letter-spacing:-.022em;margin:0 0 .3em;font-weight:800}
   .dek{font-size:clamp(1.1rem,2vw,1.3rem);color:var(--muted);max-width:58ch;margin:0 0 1.4em;line-height:1.5}
   .meta{font-size:.88rem;color:var(--muted);display:flex;gap:10px 22px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
   .meta span{display:inline-flex;align-items:center;gap:8px}
@@ -59,7 +60,7 @@
   .model p{margin:0} .model strong{color:var(--navy-ink)}
   /* query blocks + operators + pitfalls */
   .query{font-family:var(--mono);font-size:.92rem;line-height:1.55;background:#0f172a;color:#e6edf6;border-radius:10px;padding:13px 16px;margin:12px 0;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
-  .query b{color:#fbbf24;font-weight:700}
+  .query b{color:#5eead4;font-weight:700}
   .query .bad{color:#fca5a5;font-weight:700}
   .tablewrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:10px}
   table.ops{width:100%;min-width:460px;border-collapse:collapse;font-size:.96rem}
