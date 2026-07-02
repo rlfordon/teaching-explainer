@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>teaching-explainer</title>
+<style>
+  :root{--paper:#fcfcfa;--ink:#17181b;--muted:#586070;--line:#e7e6e0;--band:#f4f3ee;
+    --navy:#1d4ed8;--navy-ink:#1b3aa8;--navy-tint:#eef2ff;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+  a{color:var(--navy-ink);text-underline-offset:2px}
+  header{border-top:4px solid var(--navy);border-bottom:1px solid var(--line);
+    background:radial-gradient(120% 130% at 0% 0%,#fff,var(--band))}
+  .hero{padding:72px 0 48px}
+  .eyebrow{text-transform:uppercase;letter-spacing:.1em;font-size:.75rem;font-weight:700;color:var(--navy);margin:0 0 14px}
+  h1{font-family:var(--serif);font-size:clamp(2.2rem,6vw,3.2rem);line-height:1.05;letter-spacing:-.015em;margin:0 0 .3em}
+  .dek{font-size:1.2rem;color:var(--muted);max-width:56ch;margin:0 0 28px}
+  .cta{display:flex;gap:14px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:12px 22px;border-radius:10px;
+    font-weight:600;text-decoration:none;transition:background .15s,transform .08s,box-shadow .15s}
+  .btn.primary{background:var(--navy);color:#fff;box-shadow:0 2px 10px rgba(29,78,216,.3)}
+  .btn.primary:hover{background:var(--navy-ink)}
+  .btn.ghost{background:#fff;color:var(--navy-ink);border:1.5px solid var(--navy)}
+  .btn.ghost:hover{background:var(--navy-tint)}
+  .btn:active{transform:translateY(1px)}
+  main{padding:52px 0 80px}
+  h2{font-family:var(--serif);font-size:1.5rem;margin:0 0 .4em}
+  .lead{font-size:1.08rem}
+  ul.feat{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:14px}
+  ul.feat li{padding-left:26px;position:relative}
+  ul.feat li::before{content:"";position:absolute;left:4px;top:.55em;width:9px;height:9px;border-radius:50%;background:var(--navy);opacity:.55}
+  .card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:24px 26px;margin-top:28px;
+    box-shadow:0 1px 2px rgba(20,22,30,.05),0 2px 6px rgba(20,22,30,.05)}
+  .card h2{margin-top:0}
+  code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--band);padding:2px 6px;border-radius:5px;font-size:.9em}
+  footer{border-top:1px solid var(--line);background:var(--band);color:var(--muted);font-size:.9rem}
+  footer .wrap{padding:28px 24px}
+  .note{font-size:.85rem;color:var(--muted);margin-top:14px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap hero">
+    <p class="eyebrow">A Claude Code skill · Legal & general pedagogy</p>
+    <h1>teaching-explainer</h1>
+    <p class="dek">Generate accessible, evidence-based, lightly-interactive HTML explainers for teaching — built for law school, but for any course.</p>
+    <div class="cta">
+      <a class="btn primary" href="./teaching-explainer/examples/ai-prompting.html">Try the live example →</a>
+      <a class="btn ghost" href="https://github.com/rlfordon/teaching-explainer">View on GitHub</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <p class="lead">Every explainer this skill produces is active by construction — organized around how <em>you</em> teach the topic, with hands-on interactions instead of passive text — and grounded in the learning-sciences evidence.</p>
+    <ul class="feat">
+      <li><strong>Active by construction</strong> — predict-then-reveal, low-stakes retrieval checks, self-explanation, sort/classify, and step-throughs.</li>
+      <li><strong>Evidence-based</strong> — active learning, retrieval practice, Mayer's high-yield multimedia principles, ICAP; thin evidence flagged honestly.</li>
+      <li><strong>Accessible</strong> — conforms to WCAG 2.2 Level AA, verified by an automated Playwright + axe test suite.</li>
+      <li><strong>Portable &amp; private</strong> — one self-contained <code>.html</code> file that works offline, drops into any LMS, and keeps every answer in the student's browser.</li>
+    </ul>
+
+    <div class="card">
+      <h2>The live example</h2>
+      <p>A full interactive explainer on <strong>prompting AI for legal work</strong> — the "brilliant but literal new associate" mental model, the five jobs of a prompt, open chatbots vs. grounded legal tools (Westlaw / Lexis / vLex), and why you verify every citation.</p>
+      <div class="cta">
+        <a class="btn primary" href="./teaching-explainer/examples/ai-prompting.html">Open the explainer →</a>
+      </div>
+      <p class="note">Educational exemplar. Platform details and figures were current as of June 2026 — reconfirm before relying on specifics.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Built with the <a href="https://github.com/rlfordon/teaching-explainer">teaching-explainer</a> skill. Stands on <a href="https://github.com/ds-vibe/html-explainer">html-explainer</a> by Derek Schwede (MIT). Licensed MIT © 2026 Rebecca Fordon.</p>
+  </div>
+</footer>
+</body>
+</html>

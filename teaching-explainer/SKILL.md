@@ -202,9 +202,24 @@ automatically. Do not scatter magic numbers.
 
 ## Phase 3 — Build
 
-*Follow html-explainer's Phase 3.* The deliverable is a real `.html` file, never pasted into
-chat. Write the raw page content — bespoke HTML, CSS, and JS — without inlining
-`assets/review-mode.js` or `chat-dock.js`. Then assemble:
+*Follow html-explainer's Phase 3.* The deliverable is a real `.html` file, never pasted into chat.
+
+**Inline the kit into the raw file — both files, every time.** The page must include:
+
+- `assets/components.css` in a `<style>` block (interaction styles + design tokens), **and**
+- `assets/components.js` in a `<script>` block (the behavior that initializes every `data-te`
+  component on `DOMContentLoaded`).
+
+Both are required. The assembler in the next step injects **only** `review-mode.js` — it does
+*not* add the kit's CSS or JS. If you inline `components.js` but forget `components.css`, the
+components still *function* but render unstyled — default browser radios, list bullets on
+`classify`, and a visible screen-reader-only label leaking onto the page. That is the classic
+"it works but looks janky" failure; it passes `npm test` (the kit's own tests supply their own
+styling context) and passes axe (a missing stylesheet is not a violation), so nothing but this
+check catches it. Verify both are present before assembling — Phase 5 re-checks it.
+
+Write the raw page content — bespoke HTML, your page CSS, the inlined kit CSS + JS — **without**
+inlining `assets/review-mode.js` or `chat-dock.js`. Then assemble:
 
 ```
 node ~/.claude/skills/html-explainer/scripts/assemble.mjs <raw-file.html> [--chat] -o <output.html>
@@ -213,6 +228,11 @@ node ~/.claude/skills/html-explainer/scripts/assemble.mjs <raw-file.html> [--cha
 The assembler injects `review-mode.js` (and optionally `chat-dock.js`), validates unique IDs,
 and flags escaping issues. Include `<body data-review-toggle>` so the Review & edit launcher
 appears by default.
+
+**Standalone build (no assembler).** For a maximally portable single file — or whenever
+html-explainer isn't installed — inline **all three** (`components.css`, `components.js`, and
+`review-mode.js`) directly and skip the assembler. The result is one self-contained `.html`
+with no external references, which opens offline and drops into any LMS.
 
 **Component kit quick reference — `data-te` contracts:**
 
@@ -272,6 +292,18 @@ In addition, before declaring done, run a quick pedagogy pre-flight layered on t
 
 It is layered on top of html-explainer's Phase 5 verify-and-ship step. Run it after the
 screenshot loop confirms no visual bugs.
+
+### Build integrity
+
+- [ ] **Kit CSS inlined** — `components.css` is present in the page. Spot-check one rendered
+      component: options look like styled cards with custom-colored radios (not raw browser
+      radios), `classify` items have no list bullets, and no screen-reader-only label text is
+      visible anywhere on the page. If any of those appear, `components.css` is missing — add it.
+- [ ] **Kit JS inlined** — `components.js` is present; every `[data-te]` element initializes
+      (carries `data-te-ready="1"`). A component that renders its markup but does nothing on
+      interaction means the JS is missing.
+- [ ] **Edit overlay present** — `review-mode.js` is injected (via the assembler) or inlined
+      (standalone), and the "Review & edit" launcher appears with `<body data-review-toggle>`.
 
 ### Pedagogy gate
 
