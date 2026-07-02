@@ -18,12 +18,14 @@ Every explainer it produces is:
 - **Portable and private** — a single self-contained `.html` file that works offline, drops into
   any LMS, and is purely self-check (nothing leaves the student's browser).
 
+**See them live: [examples gallery](https://rlfordon.github.io/teaching-explainer/)** — open, share, or drop any explainer into an LMS.
+
 ## What's in this repo
 
 | Path | What it is |
 |------|-----------|
 | [`teaching-explainer/`](teaching-explainer/) | The skill itself — `SKILL.md` (the Phase 0–6 process), reference docs, the accessible component kit, and the edit overlay. See its [README](teaching-explainer/README.md) to install. |
-| [`teaching-explainer/examples/ai-prompting.html`](teaching-explainer/examples/ai-prompting.html) | The first exemplar: an interactive explainer on **prompting AI for legal work** (general principles + Westlaw / Lexis / vLex specifics + verification). Built *with* the skill. |
+| [`teaching-explainer/examples/`](teaching-explainer/examples/) | Interactive explainers built *with* the skill — see the **Examples** section below for live links. |
 | [`research/pedagogy-evidence-base.md`](research/pedagogy-evidence-base.md) | The cited pedagogy research the skill is built on. |
 | [`docs/superpowers/specs/`](docs/superpowers/specs/) · [`docs/superpowers/plans/`](docs/superpowers/plans/) | The design spec and implementation plan. |
 | [`test/`](test/) | Playwright + axe-core tests for the component kit (behavior + accessibility). |
@@ -38,15 +40,18 @@ accessible **by construction** (keyboard-operable, screen-reader-announced via A
 `classify` (keyboard-first, no drag required) · `step-through` · plus an accessible **Review & edit**
 overlay for a non-technical revision loop.
 
-## Try the exemplar
+## Examples
 
-Download [`ai-prompting.html`](teaching-explainer/examples/ai-prompting.html) and open it in any
-browser — no server, no build. Add `?edit` to the URL (or click **Review & edit**) to annotate it
-and export a revision brief.
+Built with this skill and hosted on GitHub Pages — each is a self-contained `.html` file you can open, share, or drop into an LMS:
 
-> The AI-prompting explainer is an educational exemplar. Its platform details and the empirical
-> figures were current as of **June 2026** and should be reconfirmed — see
-> [`ai-prompting-sources.md`](teaching-explainer/examples/ai-prompting-sources.md).
+| Explainer | Focus | Live |
+|---|---|---|
+| Prompting AI for legal work | general prompting principles + Westlaw / Lexis / vLex specifics + verification | [open](https://rlfordon.github.io/teaching-explainer/teaching-explainer/examples/ai-prompting.html) |
+| Boolean searching, without the traps | terms & connectors, a four-move method, and the common pitfalls | [open](https://rlfordon.github.io/teaching-explainer/teaching-explainer/examples/boolean-search.html) |
+
+Source lives in [`teaching-explainer/examples/`](teaching-explainer/examples/). Open any explainer with `?edit` (or click **Review & edit**) to annotate it in place and export a revision brief.
+
+> The AI-prompting explainer's platform details and empirical figures were current as of **June 2026** and should be reconfirmed ([sources](teaching-explainer/examples/ai-prompting-sources.md)); the Boolean explainer's connector syntax is Westlaw's and varies by platform.
 
 ## Run the tests
 
