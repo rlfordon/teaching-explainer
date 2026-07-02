@@ -54,8 +54,9 @@ welcome to use them, but they are strictly optional conveniences — never a req
 
 ## Phase 0 — Scope, ground, research
 
-*Built on html-explainer's Phase 0 (its scoping interview + settled/dynamic research gate),
-adapted to be pedagogy-first.*
+*A scoping interview plus a settled/dynamic research gate — an approach adapted from
+html-explainer (credited in the README), made pedagogy-first here. Self-contained; nothing to
+install.*
 
 ### The interview — ask all six axes, in one message
 
