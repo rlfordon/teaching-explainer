@@ -63,12 +63,15 @@ npm test
 
 ## Acknowledgments
 
-This skill stands on the shoulders of **[html-explainer](https://github.com/ds-vibe/html-explainer)
-by Derek Schwede** (MIT) — the original "polished interactive HTML explainer" skill that inspired
-this project. `teaching-explainer` deliberately *references* html-explainer for the generic build
-craft (its visual system, quality loop, and helper scripts) rather than copying it, and adds the
-evidence-based pedagogy spine, the accessible-by-construction component kit, and WCAG 2.2 AA
-enforcement on top. Thank you, Derek.
+This skill was **inspired by — and includes adapted portions of — [html-explainer](https://github.com/ds-vibe/html-explainer)
+by Derek Schwede** (MIT). Its visual-design bar and quality loop
+([`references/visual-and-quality.md`](teaching-explainer/references/visual-and-quality.md)) are
+adapted from html-explainer's Phase 2 and Phase 4 under the MIT License — see
+[`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md). Everything else — the evidence-based pedagogy
+spine, the accessible-by-construction component kit, WCAG 2.2 AA enforcement, the edit overlay, and
+the explainers — is original. `teaching-explainer` is **standalone**: it does not require
+html-explainer, though it stays compatible with it. Thank you, Derek; this project wouldn't exist
+without yours.
 
 Also inspired by Anthropic's write-up on
 [the unreasonable effectiveness of HTML with Claude Code](https://claude.com/blog/using-claude-code-the-unreasonable-effectiveness-of-html).

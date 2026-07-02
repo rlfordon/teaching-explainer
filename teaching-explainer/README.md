@@ -33,58 +33,41 @@ before/after lecture."
 
 ---
 
-## Soft dependency — html-explainer
+## Standalone — html-explainer is optional
 
-`teaching-explainer` is designed to run alongside the `html-explainer` skill. Install both:
+`teaching-explainer` is **fully self-contained**. Nothing else needs to be installed. Its visual
+design bar and quality loop live in [`references/visual-and-quality.md`](references/visual-and-quality.md)
+(adapted from html-explainer's Phase 2/4 under the MIT License — see
+[`THIRD-PARTY-NOTICES.md`](../THIRD-PARTY-NOTICES.md)); its pedagogy spine, component kit,
+accessibility gate, and edit overlay are its own. Every explainer it builds is a single
+self-contained `.html` file with all kit CSS/JS inlined.
 
-```bash
-ln -s /path/to/html-explainer ~/.claude/skills/html-explainer
-```
-
-When `html-explainer` is present, Phases 2 and 4 reference its visual design system and
-quality loop directly, and the build pipeline uses its helper scripts:
-
-- `~/.claude/skills/html-explainer/scripts/assemble.mjs` — injects `review-mode.js` (and
-  optionally `chat-dock.js`), validates unique IDs, flags escaping issues.
-- `~/.claude/skills/html-explainer/scripts/shoot.mjs` — screenshot loop for visual QA.
-
-**If `html-explainer` is not installed,** the skill degrades gracefully:
-
-- Logs the missing dependency in build output.
-- Inlines `assets/components.css`, `assets/components.js`, and `assets/review-mode.js`
-  directly into the output file (all are self-contained; no bundler needed).
-- Applies Phase 2 and Phase 4 principles from their written descriptions in `SKILL.md` rather
-  than deferring to `html-explainer`'s phases.
-- Skips `assemble.mjs` / `shoot.mjs`; delivers the raw assembled file instead.
-
-The pedagogy spine, component kit, and accessibility gate are entirely ours and are unaffected
-by whether `html-explainer` is installed.
+It was **inspired by** [`html-explainer`](https://github.com/ds-vibe/html-explainer) by Derek
+Schwede (credited below) — a separate skill you do **not** need to install. If you already use it,
+it's compatible: the skill will happily use its fuller Phase 2/4 guidance and its
+`scripts/assemble.mjs` / `scripts/shoot.mjs` helpers when present. That's a convenience, never a
+requirement, and nothing about a generated explainer depends on it.
 
 ---
 
-## Referenced vs. owned — sync table
+## What's ours (and what's optional)
 
-This skill deliberately references `html-explainer` rather than copying from it. The
-maintenance burden is proportional to the amount copied — and we copied almost nothing.
+Everything that determines an explainer's quality or correctness ships in this skill. Only optional
+conveniences come from `html-explainer`.
 
 | | Item | Notes |
 |---|---|---|
-| **REFERENCED** | html-explainer Phase 2 — visual design system | Pointed to, not duplicated; we add `assets/components.css` on top |
-| **REFERENCED** | html-explainer Phase 4 — quality loop + pre-flight checklist | Run in full; our Phase 4 layers pedagogy checks on top |
-| **REFERENCED** | `scripts/assemble.mjs` | Called from html-explainer's install path; we do not maintain it |
-| **REFERENCED** | `scripts/shoot.mjs` | Same — called from html-explainer; not ours to maintain |
-| **OWNED** | Pedagogy spine (7 rules, Phase 0–6 process) | `SKILL.md`; the core of what makes this skill distinct |
-| **OWNED** | Component kit (`assets/components.{css,js}`) | predict-reveal, retrieval-mc, self-explain, classify, step-through |
-| **OWNED** | Accessibility enforcement (`references/accessibility.md`, Phase 5 gate) | WCAG 2.2 AA, by-construction + verified |
-| **OWNED** | Instructor-framework intake (`references/instructor-framework.md`) | Elicitation questions, structure decision tree, worked examples |
-| **OWNED** | Review-mode overlay (`assets/review-mode.js`) | A11y-hardened copy we control outright |
+| **OURS** | Pedagogy spine (7 rules, Phase 0–6 process) | `SKILL.md` — the core of the skill |
+| **ADAPTED (MIT)** | Visual bar + quality loop | `references/visual-and-quality.md` — adapted from html-explainer's Phase 2/4; see `THIRD-PARTY-NOTICES.md` |
+| **OURS** | Component kit (`assets/components.{css,js}`) | predict-reveal, retrieval-mc, self-explain, classify, step-through |
+| **OURS** | Accessibility enforcement (`references/accessibility.md`, Phase 5 gate) | WCAG 2.2 AA, by-construction + verified |
+| **OURS** | Instructor-framework intake (`references/instructor-framework.md`) | Elicitation, structure decision guidance, worked examples |
+| **OURS** | Review-mode overlay (`assets/review-mode.js`) | A11y-hardened, owned outright |
+| **OPTIONAL** | html-explainer Phase 2 / Phase 4 | Fuller visual + quality guidance; used only if it's installed |
+| **OPTIONAL** | `scripts/assemble.mjs` / `scripts/shoot.mjs` | Assembler + screenshot helpers; used only if installed |
 
-**Maintenance rule:** sync burden ≈ copied surface; we copied ~none.
-
-If `html-explainer` updates its Phase 2 or Phase 4, this skill benefits automatically
-with zero re-sync work. The only things that need attention when `html-explainer` changes are
-the handful of script invocations in `SKILL.md`'s Phase 3 — and those are call signatures,
-not reimplementations.
+Because we don't depend on `html-explainer`, there is nothing to re-sync when it changes. If you
+do run it, its improvements are simply available to draw on.
 
 ---
 
@@ -150,6 +133,6 @@ init, so the guarantee holds even if the author omits those attributes from mark
 - **Score tally:** add a `[data-te-tally]` element anywhere on the page to display a running
   correct/total tally across all `retrieval-mc` components.
 
-For full `assemble.mjs` and `shoot.mjs` documentation and the drop-in widget API (including
-`chat-dock.js` for built-in Q&A), see `html-explainer`'s *Drop-in widgets* and Phase 3
-sections.
+The optional `assemble.mjs` / `shoot.mjs` scripts and the `chat-dock.js` Q&A widget belong to
+`html-explainer`. If you use it, see its *Drop-in widgets* and Phase 3 sections for their docs —
+none of them are required by this skill.

@@ -22,29 +22,25 @@ blanks. What matters most:
 3. **Accessible by construction** — the component kit (`assets/components.{css,js}`) implements
    WCAG 2.2 AA mechanics for every interactive element. The QA gate in Phase 5 verifies both
    the automated and the manual checklist from `references/accessibility.md`.
-4. **Referencing discipline** — this skill owns pedagogy, components, and accessibility. It
-   delegates build craft (visual system, quality loop, helper scripts) to `html-explainer`.
-   Reference, don't copy.
+4. **Self-contained** — this skill owns everything it needs: pedagogy, components, accessibility,
+   and its own build craft (visual system + quality loop) in `references/visual-and-quality.md`.
+   The `html-explainer` skill is optional and compatible, not required (see "Standalone skill").
 
 ---
 
-## Soft dependency — html-explainer
+## Standalone skill
 
-This skill is designed to run alongside the `html-explainer` skill. When `html-explainer` is
-installed, Phases 2–4 reference its Phase 2 visual system and Phase 4 quality loop directly,
-and the build uses its `scripts/assemble.mjs` and `scripts/shoot.mjs` helper scripts.
+This skill is **fully self-contained** — install it and use it on its own; nothing else is
+required. Its visual-design bar and quality loop live in
+[`references/visual-and-quality.md`](references/visual-and-quality.md); its pedagogy spine,
+component kit, accessibility gate, and edit overlay are all its own. Every explainer it produces
+is a single self-contained `.html` file (inline `assets/components.css`, `assets/components.js`,
+and `assets/review-mode.js` — see Phase 3).
 
-If `html-explainer` is not installed, the skill degrades gracefully:
-
-- Note the missing dependency in the build output.
-- Inline `assets/components.css`, `assets/components.js`, and `assets/review-mode.js` directly
-  into the output file (already self-contained JS/CSS; no bundler needed).
-- Apply Phase 2 and Phase 4 principles from their written descriptions here rather than
-  deferring to html-explainer's phases.
-- Skip the `assemble.mjs` / `shoot.mjs` step; instead, deliver the raw assembled file.
-
-The amount that degrades is small. The pedagogy spine, component kit, and accessibility gate
-are entirely ours and are unaffected.
+This skill was **inspired by** the `html-explainer` skill (credited in the README) — a separate
+project you do **not** need to install. If you already happen to use html-explainer, its Phase 2/4
+guidance and its `scripts/assemble.mjs` / `scripts/shoot.mjs` helpers are compatible and you're
+welcome to use them, but they are strictly optional conveniences — never a requirement.
 
 ---
 
@@ -187,11 +183,12 @@ quality lever. Reorder freely at this stage — it costs nothing here and everyt
 
 ## Phase 2 — Visual design system
 
-*Follow html-explainer's Phase 2 in full.* Its Phase 2 is the source of truth for what good
-visual design looks like, including: the quality bar (professionally edited, purposeful,
-restrained); the anti-slop checklist (no emoji as icons, no decorative gradients, no bento
-grids, no generic SaaS texture); variety with rhythm; typography and space; horizontal use of
-the page; motion with purpose; and contrast per surface.
+*Follow this skill's visual-design bar in
+[`references/visual-and-quality.md`](references/visual-and-quality.md)* — the quality bar
+(professionally edited, purposeful, restrained); the anti-slop checklist (no emoji as icons, no
+decorative gradients, no bento grids, no generic SaaS texture); variety with rhythm; typography
+and space; horizontal use of the page; motion with purpose; and contrast per surface. (If you
+also use html-explainer, its Phase 2 covers the same ground in more depth — optional.)
 
 Assemble with our kit by including `assets/components.css` (our interaction styles and design
 tokens) alongside your bespoke page CSS. All design tokens (color, spacing, type scale) go
@@ -202,37 +199,30 @@ automatically. Do not scatter magic numbers.
 
 ## Phase 3 — Build
 
-*Follow html-explainer's Phase 3.* The deliverable is a real `.html` file, never pasted into chat.
+The deliverable is a real self-contained `.html` file, never pasted into chat.
 
-**Inline the kit into the raw file — both files, every time.** The page must include:
+**Inline the kit — all three files.** Build one portable file that includes:
 
-- `assets/components.css` in a `<style>` block (interaction styles + design tokens), **and**
-- `assets/components.js` in a `<script>` block (the behavior that initializes every `data-te`
-  component on `DOMContentLoaded`).
+- `assets/components.css` in a `<style>` block (interaction styles + design tokens),
+- `assets/components.js` in a `<script>` block (initializes every `data-te` component on
+  `DOMContentLoaded`), and
+- `assets/review-mode.js` in a `<script>` block before `</body>`, with `<body data-review-toggle>`
+  so the Review & edit launcher appears.
 
-Both are required. The assembler in the next step injects **only** `review-mode.js` — it does
-*not* add the kit's CSS or JS. If you inline `components.js` but forget `components.css`, the
-components still *function* but render unstyled — default browser radios, list bullets on
-`classify`, and a visible screen-reader-only label leaking onto the page. That is the classic
-"it works but looks janky" failure; it passes `npm test` (the kit's own tests supply their own
-styling context) and passes axe (a missing stylesheet is not a violation), so nothing but this
-check catches it. Verify both are present before assembling — Phase 5 re-checks it.
+All three are required for a complete explainer. **Do not forget `components.css`.** If you inline
+`components.js` but not the CSS, the components still *function* but render unstyled — default
+browser radios, list bullets on `classify`, and a visible screen-reader-only label leaking onto
+the page. That is the classic "it works but looks janky" failure; it passes `npm test` and passes
+axe (a missing stylesheet is not a violation), so nothing but a visual/build-integrity check catches
+it. Phase 5 re-checks that all three are present.
 
-Write the raw page content — bespoke HTML, your page CSS, the inlined kit CSS + JS — **without**
-inlining `assets/review-mode.js` or `chat-dock.js`. Then assemble:
+The result is one self-contained file with no external references — it opens offline and drops into
+any LMS.
 
-```
-node ~/.claude/skills/html-explainer/scripts/assemble.mjs <raw-file.html> [--chat] -o <output.html>
-```
-
-The assembler injects `review-mode.js` (and optionally `chat-dock.js`), validates unique IDs,
-and flags escaping issues. Include `<body data-review-toggle>` so the Review & edit launcher
-appears by default.
-
-**Standalone build (no assembler).** For a maximally portable single file — or whenever
-html-explainer isn't installed — inline **all three** (`components.css`, `components.js`, and
-`review-mode.js`) directly and skip the assembler. The result is one self-contained `.html`
-with no external references, which opens offline and drops into any LMS.
+*Optional (only if you use html-explainer):* rather than inlining `review-mode.js` by hand, you can
+write the raw page (with `components.css` + `components.js` inlined) and run its assembler to inject
+the overlay — `node ~/.claude/skills/html-explainer/scripts/assemble.mjs <raw-file.html> -o <output.html>`.
+A convenience, not a requirement.
 
 **Component kit quick reference — `data-te` contracts:**
 
@@ -261,16 +251,17 @@ Preview / Edit text / Add note / Download edits / Copy notes for LLM. A running 
 retrieval check scores is available by adding a `[data-te-tally]` element anywhere on the
 page.
 
-For the full `assemble.mjs` and `shoot.mjs` documentation and the drop-in widget API,
-see html-explainer's *Drop-in widgets* and Phase 3 sections.
+The optional `assemble.mjs` / `shoot.mjs` scripts and the `chat-dock.js` widget belong to
+html-explainer; if you use it, see its *Drop-in widgets* and Phase 3 sections. None are required.
 
 ---
 
 ## Phase 4 — Quality loop
 
-*Follow html-explainer's Phase 4 in full* — especially its mandatory Step 0 static pre-flight
-checklist and the screenshot-before-done rule using `scripts/shoot.mjs`. Every item on
-html-explainer's pre-flight list applies here without exception.
+*Follow the quality loop in [`references/visual-and-quality.md`](references/visual-and-quality.md)* —
+its Step 0 static pre-flight (run it every time, even with no browser) and the render-and-look
+screenshot pass when a browser is available. (If you also use html-explainer, its Phase 4 is a
+fuller version of the same loop, with a `scripts/shoot.mjs` screenshot helper — optional.)
 
 In addition, before declaring done, run a quick pedagogy pre-flight layered on top:
 
@@ -290,8 +281,8 @@ In addition, before declaring done, run a quick pedagogy pre-flight layered on t
 
 **This gate must pass before the explainer is "done." No exceptions.**
 
-It is layered on top of html-explainer's Phase 5 verify-and-ship step. Run it after the
-screenshot loop confirms no visual bugs.
+Run it after the Phase 4 quality loop (see `references/visual-and-quality.md`) confirms no
+visual bugs.
 
 ### Build integrity
 
@@ -432,7 +423,8 @@ integration is out of scope; the output is purely self-check and nothing leaves 
 - `references/instructor-framework.md` — the three kinds of organizing structure, Phase-0
   elicitation questions, the "never force it" rule, section-order mapping, and two worked
   examples (legal research process framework; hearsay conceptual mental model).
-- `html-explainer` SKILL.md — Phase 2 (visual design system), Phase 4 (quality loop and
-  pre-flight checklist), Phase 5 (verify and ship), and the `scripts/assemble.mjs` /
-  `scripts/shoot.mjs` helper scripts. This skill owns pedagogy, components, and accessibility;
-  html-explainer owns build craft. Reference, don't copy.
+- `references/visual-and-quality.md` — this skill's own visual-design bar and quality loop
+  (Phases 2 and 4).
+- `html-explainer` (optional) — a separate, compatible skill. If installed, its Phase 2/4 offer
+  fuller build-craft guidance and its `scripts/assemble.mjs` / `scripts/shoot.mjs` are handy
+  helpers. Not required; this skill is self-contained.
