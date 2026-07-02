@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boolean Searching for Legal Research</title>
+<style>
+  :root{
+    --paper:#fcfcfa; --ink:#17181b; --muted:#586070; --line:#e7e6e0;
+    --band:#f4f3ee; --navy:#1d4ed8; --navy-ink:#1b3aa8; --navy-tint:#eef2ff;
+    --gold:#845c00; --gold-tint:#fbf3df; --gold-line:#ecd9a3;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --maxw:1160px; --prose:66ch;
+    --shadow-sm:0 1px 2px rgba(20,22,30,.05),0 2px 6px rgba(20,22,30,.05);
+    --shadow-md:0 6px 22px rgba(20,22,30,.09);
+    --r:12px; --r-lg:16px;
+    --te-ink:#17181b; --te-bg:#fff; --te-accent:#1d4ed8; --te-correct:#1b5e20;
+    --te-incorrect:#b00020; --te-focus:#1d4ed8; --te-radius:10px; --te-gap:12px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:70px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    font-size:18px;line-height:1.65;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .prose{max-width:var(--prose)}
+  p{margin:0 0 1em}
+  h1,h2,h3,h4{font-family:var(--serif);color:var(--ink)}
+  h2{font-size:clamp(1.65rem,3vw,2.15rem);line-height:1.13;margin:0 0 .35em;letter-spacing:-.012em}
+  h3{font-size:1.2rem;line-height:1.25;margin:1.3em 0 .3em}
+  a{color:var(--navy-ink);text-underline-offset:2px}
+  *:focus-visible{outline:3px solid var(--te-focus);outline-offset:2px;border-radius:3px}
+  .te-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--navy);color:#fff;padding:10px 16px;z-index:100;border-radius:0 0 8px 0}
+  .skip:focus{left:0}
+  /* hero */
+  header.hero{border-top:4px solid var(--navy);border-bottom:1px solid var(--line);
+    background:radial-gradient(120% 130% at 0% 0%, #ffffff, var(--band))}
+  .hero-inner{padding:72px 0 44px}
+  .eyebrow{font-family:var(--sans);text-transform:uppercase;letter-spacing:.1em;font-size:.75rem;font-weight:700;color:var(--navy);margin:0 0 16px}
+  h1{font-family:var(--serif);font-size:clamp(2.2rem,5.5vw,3.4rem);line-height:1.05;letter-spacing:-.015em;margin:0 0 .3em}
+  .dek{font-size:clamp(1.1rem,2vw,1.3rem);color:var(--muted);max-width:58ch;margin:0 0 1.4em;line-height:1.5}
+  .meta{font-size:.88rem;color:var(--muted);display:flex;gap:10px 22px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
+  .meta span{display:inline-flex;align-items:center;gap:8px}
+  .meta span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--navy);opacity:.55}
+  /* nav */
+  nav.toc{position:sticky;top:0;z-index:30;background:rgba(252,252,250,.88);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--line)}
+  nav.toc ol{display:flex;flex-wrap:wrap;gap:2px 6px;margin:0 auto;padding:10px 20px;max-width:var(--maxw);list-style:none;font-size:.85rem}
+  nav.toc a{display:inline-flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-weight:600;padding:6px 10px;border-radius:8px}
+  nav.toc a:hover{color:var(--navy-ink);background:var(--navy-tint)}
+  nav.toc .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--navy);color:#fff;font-size:.72rem;font-variant-numeric:tabular-nums}
+  /* sections */
+  section{padding:60px 0;border-bottom:1px solid var(--line)}
+  section.band{background:var(--band)}
+  .lede{font-size:1.16rem}
+  .kicker{font-family:var(--sans);text-transform:uppercase;letter-spacing:.09em;font-size:.74rem;font-weight:700;color:var(--navy);margin:0 0 8px}
+  .model{border-left:4px solid var(--navy);background:var(--navy-tint);padding:20px 24px;border-radius:0 var(--r) var(--r) 0;margin:10px 0 6px;box-shadow:var(--shadow-sm)}
+  .model p{margin:0} .model strong{color:var(--navy-ink)}
+  /* query blocks + operators + pitfalls */
+  .query{font-family:var(--mono);font-size:.92rem;line-height:1.55;background:#0f172a;color:#e6edf6;border-radius:10px;padding:13px 16px;margin:12px 0;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+  .query b{color:#fbbf24;font-weight:700}
+  .query .bad{color:#fca5a5;font-weight:700}
+  .tablewrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:10px}
+  table.ops{width:100%;min-width:460px;border-collapse:collapse;font-size:.96rem}
+  table.ops th,table.ops td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.ops th{font-family:var(--sans);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  table.ops code, code.op{font-family:var(--mono);background:var(--band);padding:1px 6px;border-radius:5px;font-weight:700;color:var(--navy-ink)}
+  .pitfall{border:1px solid #f0c2c9;border-left:4px solid var(--te-incorrect);background:#fdf1f3;padding:18px 20px;border-radius:0 var(--r) var(--r) 0;margin:20px 0;box-shadow:var(--shadow-sm)}
+  .pitfall h3{margin:0 0 6px;color:var(--te-incorrect);font-family:var(--sans);font-size:1.02rem}
+  .pitfall p{margin:.4em 0}
+  .fix{border-left:4px solid var(--te-correct);background:#e9f5ea;padding:12px 16px;border-radius:0 10px 10px 0;margin:12px 0 2px}
+  .fix::before{content:"The fix";display:block;font-size:.66rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--te-correct);margin-bottom:6px}
+  .fix p{margin:0}
+  /* compare + stat + platform + badge (shared) */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:24px 0}
+  @media(max-width:700px){.compare{grid-template-columns:1fr}}
+  .card{border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;background:#fff;box-shadow:var(--shadow-sm)}
+  .card h4{margin:0 0 10px;font-family:var(--sans);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:8px}
+  .card h4::before{content:"";width:9px;height:9px;border-radius:2px}
+  .card.nl h4{color:var(--gold)} .card.nl h4::before{background:var(--gold)}
+  .card.bool h4{color:var(--navy)} .card.bool h4::before{background:var(--navy)}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:var(--gold-tint);color:var(--gold);border:1px solid var(--gold-line);border-radius:999px;padding:6px 14px;font-size:.8rem;font-weight:600}
+  .badge::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold)}
+  sup a{text-decoration:none;font-weight:700;color:var(--navy);padding:0 1px}
+  .ref{font-size:.82rem;color:var(--muted);line-height:1.5}
+  .cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+  a.btn-link{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:12px 22px;border-radius:10px;font-weight:600;text-decoration:none;background:var(--navy);color:#fff;box-shadow:0 2px 10px rgba(29,78,216,.3)}
+  a.btn-link:hover{background:var(--navy-ink)}
+  /* interaction block */
+  .te-component{font-family:var(--sans)}
+  .ix{border:1px solid var(--line);border-radius:var(--r-lg);padding:24px 26px;background:#fff;margin:26px 0;box-shadow:var(--shadow-sm)}
+  .ix-h{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:var(--gold);background:var(--gold-tint);border:1px solid var(--gold-line);padding:5px 12px;border-radius:999px;margin:0 0 16px}
+  .ix-h::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold)}
+  .te-se-q{display:block;font-weight:600;font-size:1.05rem;margin:0 0 14px;color:var(--ink);line-height:1.4}
+  .te-btn{min-height:44px;min-width:44px;padding:11px 20px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;border:1.5px solid var(--navy);background:#fff;color:var(--navy-ink);transition:transform .08s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease}
+  .te-btn:hover{background:var(--navy-tint)} .te-btn:active{transform:translateY(1px)}
+  .te-pr-reveal,.te-mc-check,.te-se-reveal,.te-st-next{background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:0 2px 8px rgba(29,78,216,.28)}
+  .te-pr-reveal:hover,.te-mc-check:hover,.te-se-reveal:hover,.te-st-next:hover{background:var(--navy-ink);border-color:var(--navy-ink)}
+  .te-pr-reveal[aria-expanded="true"]{display:none}
+  .te-se-reveal[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+  .te-st-prev{background:#fff;color:var(--navy-ink)} .te-st-prev[disabled]{opacity:.4;cursor:not-allowed}
+  .te-st-next[disabled]{opacity:.45;cursor:not-allowed}
+  .te-pr-input,.te-se-input{display:block;width:100%;min-height:88px;font:inherit;font-size:.98rem;padding:12px 14px;border:1.5px solid #cdd2db;border-radius:10px;margin:0 0 14px;background:#fcfcfb;resize:vertical}
+  .te-pr-input:focus,.te-se-input:focus{border-color:var(--navy)}
+  .te-pr-answer,.te-se-model{margin-top:16px;padding:16px 18px 16px 20px;border-left:4px solid var(--navy);background:var(--navy-tint);border-radius:0 10px 10px 0;animation:revealIn .25s ease both}
+  .te-pr-answer p,.te-se-model p{margin:0}
+  .te-pr-answer::before,.te-se-model::before{content:"Answer";display:block;font-size:.66rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--navy);margin-bottom:6px}
+  .te-se-model::before{content:"Model answer"}
+  @keyframes revealIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .te-mc{margin:0}
+  .te-mc legend{font-weight:700;font-size:1.06rem;padding:0;margin:0 0 14px;line-height:1.4;color:var(--ink)}
+  .te-mc-opt{display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:13px 16px;margin:0 0 10px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;line-height:1.4;transition:border-color .14s,background .14s}
+  .te-mc-opt:hover{border-color:#b9c2d6;background:#f8faff}
+  .te-mc-opt:has(input:checked){border-color:var(--navy);background:var(--navy-tint);box-shadow:inset 0 0 0 1px var(--navy)}
+  .te-mc-opt input[type="radio"]{margin:1px 0 0;width:20px;height:20px;accent-color:var(--navy);flex:0 0 auto}
+  .te-mc-check{margin-top:6px}
+  .te-mc-feedback{margin:16px 0 0;padding:12px 16px;border-radius:10px;font-weight:600;line-height:1.45}
+  .te-mc-feedback:empty{display:none}
+  .te-mc-feedback.te-correct{color:var(--te-correct);background:#e9f5ea;border:1px solid #b6dcb9}
+  .te-mc-feedback.te-incorrect{color:var(--te-incorrect);background:#fbecee;border:1px solid #f0c2c9}
+  .te-cl-items{list-style:none;padding:0;margin:0 0 18px;display:flex;flex-wrap:wrap;gap:10px}
+  .te-cl-item{min-height:44px;padding:11px 16px;border-radius:10px;background:#fff;border:1.5px solid #cdd2db;color:var(--ink);font:inherit;font-weight:500;cursor:pointer;transition:transform .08s,border-color .14s,background .14s,box-shadow .14s}
+  .te-cl-item:hover{border-color:var(--navy);box-shadow:var(--shadow-sm)} .te-cl-item:active{transform:translateY(1px)}
+  .te-cl-item[aria-pressed="true"]{border-color:var(--navy);background:var(--navy-tint);box-shadow:inset 0 0 0 1px var(--navy)}
+  .te-cl-item.te-cl-done{background:#e9f5ea;border-color:#b6dcb9;color:var(--te-correct);cursor:default;padding-left:38px;position:relative}
+  .te-cl-item.te-cl-done::before{content:"\2713";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--te-correct)}
+  .te-cl-cats{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 6px;padding:14px;border:1.5px dashed #c4cbd9;border-radius:12px;background:#fafbff}
+  .te-cl-cat{min-height:44px;padding:11px 18px;border-radius:10px;background:var(--navy);color:#fff;border:1.5px solid var(--navy);font:inherit;font-weight:600;cursor:pointer;transition:background .14s,transform .08s}
+  .te-cl-cat:hover{background:var(--navy-ink)} .te-cl-cat:active{transform:translateY(1px)}
+  .te-cl-feedback{margin:14px 0 0;padding:12px 16px;border-radius:10px;font-weight:600}
+  .te-cl-feedback:empty{display:none}
+  .te-cl-feedback.te-correct{color:var(--te-correct);background:#e9f5ea;border:1px solid #b6dcb9}
+  .te-cl-feedback.te-incorrect{color:var(--te-incorrect);background:#fbecee;border:1px solid #f0c2c9}
+  .te-st-progress{display:inline-block;font-size:.76rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--navy-ink);background:var(--navy-tint);border:1px solid #c7d2fe;padding:5px 13px;border-radius:999px;margin:0 0 14px}
+  .te-st-steps{min-height:170px}
+  .te-st-step[hidden]{display:none}
+  .te-st-step h3{margin:0 0 8px;color:var(--navy-ink)}
+  .te-st-step p{margin:0 0 .6em;line-height:1.55}
+  .te-st-nav{display:flex;gap:12px;margin-top:18px}
+  [data-te-tally]{display:inline-block;background:var(--navy-tint);border:1px solid #c7d2fe;border-radius:999px;padding:5px 16px;font-weight:700;color:var(--navy-ink);font-size:.88rem}
+  .qr{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:20px}
+  .qr>div{border:1px solid var(--line);border-radius:var(--r);padding:18px;background:#fff;box-shadow:var(--shadow-sm)}
+  .qr h4{margin:0 0 8px;font-size:.95rem;color:var(--navy-ink)}
+  .qr p{margin:0;font-size:.95rem;line-height:1.5}
+  footer{padding:54px 0 90px;background:var(--band);border-top:1px solid var(--line)}
+  footer h2{font-size:1.4rem}
+  .sources{font-size:.9rem;color:var(--muted);line-height:1.5} .sources li{margin:.5em 0}
+  .disclaimer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);margin-top:26px;padding-top:18px;max-width:75ch}
+  .fade{animation:fade .5s ease both}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  }
+</style>
+</head>
+<body data-review-toggle>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hero">
+  <div class="wrap hero-inner fade">
+    <p class="eyebrow">Advanced Legal Research · A teaching explainer</p>
+    <h1>Boolean searching, without the traps</h1>
+    <p class="dek">Terms and connectors give you precise, reproducible control over a legal database — once you know the moves and the mistakes that quietly wreck a search.</p>
+    <div class="meta">
+      <span>~10 minute read</span>
+      <span>Interactive — build and fix real searches</span>
+      <span>Westlaw syntax; connectors vary by platform</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <ol>
+    <li><a href="#why"><span class="n">1</span> Why Boolean</a></li>
+    <li><a href="#operators"><span class="n">2</span> The operators</a></li>
+    <li><a href="#build"><span class="n">3</span> Build a search</a></li>
+    <li><a href="#pitfalls"><span class="n">4</span> Common pitfalls</a></li>
+    <li><a href="#practice"><span class="n">5</span> Precision &amp; practice</a></li>
+  </ol>
+</nav>
+
+<main id="main">
+
+<!-- 1. WHY -->
+<section id="why">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">Start here</p>
+      <h2>The database is a literal-minded clerk</h2>
+      <p class="lede">A search engine doesn't understand your issue. It matches the exact words you give it, in the exact relationships you specify — nothing more.</p>
+      <div class="model">
+        <p>Hand a <strong>natural-language</strong> question to the clerk and it <em>guesses</em> what you meant and ranks its best guesses. Hand it a <strong>Boolean</strong> query — terms and connectors — and it does <em>exactly</em> what you said. Boolean trades the convenience of being understood for the power of precise, reproducible control. Every pitfall later in this guide is the clerk doing exactly what you typed, not what you wanted.</p>
+      </div>
+      <p>Neither is "better." Natural language is great for a quick look in an unfamiliar area; Boolean wins when you need precision, completeness, and a search you can document and re-run.</p>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Try it — sort each situation</p>
+      <div data-te="classify" class="te-component te-cl">
+        <ul class="te-cl-items">
+          <li><button type="button" class="te-btn te-cl-item" data-cat="nl">Getting oriented in an area you don't know yet</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="nl">You're not sure of the terms of art</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="bool">You need terms to appear in the same sentence</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="bool">You'll log the exact query in a research trail</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="bool">You need every on-point case, not a ranked guess</button></li>
+        </ul>
+        <div class="te-cl-cats">
+          <button type="button" class="te-btn te-cl-cat" data-cat="nl">Reach for natural language</button>
+          <button type="button" class="te-btn te-cl-cat" data-cat="bool">Reach for Boolean</button>
+        </div>
+        <p class="te-cl-feedback"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. OPERATORS -->
+<section id="operators" class="band">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">The building blocks</p>
+      <h2>The operators (terms &amp; connectors)</h2>
+      <p>A handful of connectors do almost all the work. These are Westlaw's — Lexis and other platforms use similar ideas with slightly different syntax, so check your platform's "terms and connectors" help.</p>
+    </div>
+    <div class="tablewrap">
+    <table class="ops">
+      <thead><tr><th>Operator</th><th>What it does</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><code>&amp;</code> / <code>AND</code></td><td>Both terms must appear, anywhere in the document</td><td><code>drone &amp; curtilage</code></td></tr>
+        <tr><td><code>space</code> = <code>OR</code></td><td>Either term. <strong>In Westlaw a blank space means OR</strong> — not AND.</td><td><code>drone quadcopter UAV</code></td></tr>
+        <tr><td><code>" "</code></td><td>Exact phrase, adjacent words in order (use <em>straight</em> quotes)</td><td><code>"unnatural accumulation"</code></td></tr>
+        <tr><td><code>/s</code> · <code>/p</code></td><td>Same sentence · same paragraph (keeps terms related)</td><td><code>bind! /s "bankruptcy court"</code></td></tr>
+        <tr><td><code>/n</code></td><td>Within <em>n</em> words, either order</td><td><code>assum! /3 risk</code></td></tr>
+        <tr><td><code>!</code></td><td>Root expander — matches all endings</td><td><code>neglig!</code> → negligent, negligence</td></tr>
+        <tr><td><code>*</code></td><td>Wildcard — one variable character</td><td><code>wom*n</code> → woman, women</td></tr>
+        <tr><td><code>%</code> / <code>but not</code></td><td>Excludes a term (use sparingly)</td><td><code>tax % income</code></td></tr>
+        <tr><td><code>( )</code></td><td>Groups terms to control order of operations</td><td><code>(ice OR snow) /p business</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Quick check</p>
+      <div data-te="retrieval-mc" class="te-component te-mc"
+           data-answer="1"
+           data-why="in Westlaw a blank space between words is the OR connector, so the database reads three separate alternatives — not a phrase and not AND.">
+        <fieldset style="border:0;padding:0;margin:0">
+        <legend>In Westlaw, what does the query <code>tour bus driver</code> (no quotes) actually search for?</legend>
+        <label class="te-mc-opt"><input type="radio" name="q1" value="0"> The phrase "tour bus driver"</label>
+        <label class="te-mc-opt"><input type="radio" name="q1" value="1"> tour OR bus OR driver — any of the three words</label>
+        <label class="te-mc-opt"><input type="radio" name="q1" value="2"> tour AND bus AND driver — all three, together</label>
+        </fieldset>
+        <button type="button" class="te-btn te-mc-check">Check answer</button>
+        <p class="te-mc-feedback"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. BUILD -->
+<section id="build">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">The method</p>
+      <h2>Build a search in four moves</h2>
+      <p>Good Boolean isn't guessed — it's built. Take a real problem: <em>your client slipped on an icy sidewalk outside a business that let runoff refreeze; you want cases finding for the pedestrian.</em></p>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Warm up — think in synonyms</p>
+      <div data-te="predict-reveal" class="te-component">
+        <p class="te-se-q">A court might never use the word <em>sidewalk</em>. Without typing "sidewalk," what other words could describe where the fall happened? Jot a few, then reveal.</p>
+        <label class="te-sr-only" for="pr-syn">Your synonyms</label>
+        <textarea id="pr-syn" class="te-pr-input" aria-label="Your synonyms for sidewalk"></textarea>
+        <button type="button" class="te-btn te-pr-reveal" aria-expanded="false">Reveal</button>
+        <div class="te-pr-answer" hidden>
+          <p>walkway · pavement · walk · premises · entrance · walkway · parking lot · "common area". Finding these is the whole game — it's the same skill as the classroom's <em>Boolean Taboo</em>: when the obvious word is off-limits, you're forced to brainstorm the terms a court actually used. Each synonym becomes an <code class="op">OR</code> alternative.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Walk the four moves</p>
+      <div data-te="step-through" class="te-component te-st">
+        <p class="te-st-progress"></p>
+        <ol class="te-st-steps" style="list-style:none;padding:0;margin:0">
+          <li class="te-st-step"><h3 tabindex="-1">1 · Break the issue into concepts</h3>
+            <p>Name the 2–4 ideas that must all be present. Here: <strong>(a)</strong> the icy condition, <strong>(b)</strong> the business's duty, <strong>(c)</strong> a pedestrian win on a dispositive motion.</p>
+            <p>More concepts = narrower search. Start with the fewest that capture the issue.</p></li>
+          <li class="te-st-step"><h3 tabindex="-1">2 · Brainstorm alternates; handle phrases &amp; roots</h3>
+            <p>For each concept, list synonyms. Quote phrases and use the root expander:</p>
+            <div class="query">("unnatural accumulation" <b>OR</b> ice <b>OR</b> icy <b>OR</b> snow <b>OR</b> slush)
+(negligen<b>!</b> <b>OR</b> "dangerous condition" <b>OR</b> "duty of care")
+("summary judgment" <b>OR</b> "motion to dismiss")</div></li>
+          <li class="te-st-step"><h3 tabindex="-1">3 · Join synonyms with OR, concepts with AND / proximity</h3>
+            <p>Within a concept, <code class="op">OR</code>. Between concepts, <code class="op">AND</code> — or a proximity connector when the terms should be related:</p>
+            <div class="query">("unnatural accumulation" <b>OR</b> ice <b>OR</b> snow) <b>/p</b> (business <b>OR</b> "property owner")
+<b>AND</b> ("summary judgment" <b>OR</b> "motion to dismiss")</div></li>
+          <li class="te-st-step"><h3 tabindex="-1">4 · Run, review, refine</h3>
+            <p><strong>Too many results?</strong> Tighten a connector (<code class="op">AND</code> → <code class="op">/p</code> → <code class="op">/s</code>) or add a concept. <strong>Too few?</strong> Add synonyms, loosen a connector, or check for a broken phrase or stray quote.</p>
+            <p>Then log the exact query so you can reproduce and refine it.</p></li>
+        </ol>
+        <div class="te-st-nav">
+          <button type="button" class="te-btn te-st-prev">Back</button>
+          <button type="button" class="te-btn te-st-next">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. PITFALLS -->
+<section id="pitfalls" class="band">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">Where searches quietly break</p>
+      <h2>Common mistakes &amp; pitfalls</h2>
+      <p>Most bad searches aren't wrong syntax — they're the literal clerk doing exactly what you typed. Here are the ones that bite most often.</p>
+    </div>
+
+    <div class="pitfall">
+      <h3>1 · A blank space is OR, not AND</h3>
+      <p>You want the phrase, you type it bare:</p>
+      <div class="query"><span class="bad">(tour bus driver)</span> <b>AND</b> 49 <b>/3</b> 31105</div>
+      <p>Westlaw reads <code>tour bus driver</code> as <code>tour OR bus OR driver</code> — tens of thousands of stray hits.</p>
+      <div class="fix"><p>Quote the phrase: <code>"tour bus driver" AND 49 /3 31105</code>. (The <code>49 /3 31105</code> neatly finds "49 U.S.C. § 31105" without fighting the § symbol.)</p></div>
+    </div>
+
+    <div class="pitfall">
+      <h3>2 · Smart quotes silently kill a phrase</h3>
+      <p>Draft in Word, paste into the search box, and <code>"fly ball"</code> arrives as <span class="bad">&#8220;fly ball&#8221;</span> — curly quotes the database won't read as a phrase, so it matches nothing (or everything).</p>
+      <div class="fix"><p>Type straight quotes <code>"</code> directly in the search box; don't paste quoted phrases from a word processor.</p></div>
+    </div>
+
+    <div class="pitfall">
+      <h3>3 · Too many ANDs strangle the search</h3>
+      <p>Every <code class="op">AND</code> concept must appear, so stacking them drives results toward zero:</p>
+      <div class="query">baseball <b>AND</b> (assum<b>!</b> <b>/3</b> risk) <b>AND</b> "fly ball" <b>AND</b> spectator</div>
+      <p>Miss any one term — a court says "patron" not "spectator" — and the case vanishes.</p>
+      <div class="fix"><p>Keep the core concepts, add synonyms with <code class="op">OR</code> (<code>spectator OR patron OR fan</code>), and drop non-essential terms.</p></div>
+    </div>
+
+    <div class="pitfall">
+      <h3>4 · AND when you needed proximity</h3>
+      <p><code class="op">AND</code> only means "somewhere in the same opinion" — the two terms can be pages apart and unrelated. In a long case, that's a lot of false hits.</p>
+      <div class="fix"><p>Use <code class="op">/s</code> or <code class="op">/p</code> to keep terms related: <code>"district court" /s (bind! OR bound!) /s "bankruptcy court"</code> returns fewer, tighter, easier-to-review results.</p></div>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Match the symptom to the cause</p>
+      <div data-te="classify" class="te-component te-cl">
+        <ul class="te-cl-items">
+          <li><button type="button" class="te-btn te-cl-item" data-cat="space">An unquoted 3-word name returns 40,000 cases</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="quotes">A phrase pasted from Word suddenly matches nothing</button></li>
+          <li><button type="button" class="te-btn te-cl-item" data-cat="ands">Adding a 4th required term drops you to zero results</button></li>
+        </ul>
+        <div class="te-cl-cats">
+          <button type="button" class="te-btn te-cl-cat" data-cat="space">Space read as OR</button>
+          <button type="button" class="te-btn te-cl-cat" data-cat="quotes">Smart quotes</button>
+          <button type="button" class="te-btn te-cl-cat" data-cat="ands">Over-narrowed with AND</button>
+        </div>
+        <p class="te-cl-feedback"></p>
+      </div>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Quick check</p>
+      <div data-te="retrieval-mc" class="te-component te-mc"
+           data-answer="2"
+           data-why="AND only requires both terms somewhere in the same document; a proximity connector like /s or /p keeps them related, which is what precision needs.">
+        <fieldset style="border:0;padding:0;margin:0">
+        <legend>Your search returns hundreds of cases where your two terms appear but never actually connect. The best fix is to…</legend>
+        <label class="te-mc-opt"><input type="radio" name="q2" value="0"> Add more synonyms with OR</label>
+        <label class="te-mc-opt"><input type="radio" name="q2" value="1"> Add another AND term</label>
+        <label class="te-mc-opt"><input type="radio" name="q2" value="2"> Replace AND with /s or /p</label>
+        </fieldset>
+        <button type="button" class="te-btn te-mc-check">Check answer</button>
+        <p class="te-mc-feedback"></p>
+        <p class="ref" style="margin-top:14px">Running score: <span data-te-tally data-correct="0" data-total="0">Score: 0 / 0</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. PRACTICE -->
+<section id="practice">
+  <div class="wrap">
+    <div class="prose">
+      <p class="kicker">Precision pays off</p>
+      <h2>Precision, and where to practice</h2>
+      <p>Boolean's real payoff isn't just fewer results — it's <em>reviewable</em> results and a search you can defend and re-run. A tight proximity search often surfaces the same key cases as a natural-language query, but with far less to wade through.</p>
+    </div>
+
+    <div class="ix">
+      <p class="ix-h">Diagnose and fix</p>
+      <div data-te="self-explain" class="te-component">
+        <label class="te-se-q" for="se1">A classmate searches <code>dog /p bite</code> for premises-liability cases and gets thousands of irrelevant hits. What went wrong, and how would you tighten it?</label>
+        <textarea id="se1" class="te-se-input" placeholder="Diagnose the problem and propose a fix, then compare."></textarea>
+        <button type="button" class="te-btn te-se-reveal" disabled aria-disabled="true">Reveal model answer</button>
+        <div class="te-se-model" hidden>
+          <p><code>/p</code> (same paragraph) is loose, and there are no other concepts — so any case mentioning a dog and a bite in one paragraph qualifies, including criminal and animal-control matters. Tighten it: add the missing concepts (a duty/landowner concept and the liability theory) joined with <code class="op">AND</code>, use synonyms with <code class="op">OR</code> (<code>dog OR animal</code>), and consider <code class="op">/s</code> instead of <code class="op">/p</code>. e.g., <code>(dog OR animal) /s (bit! OR attack!) AND (landlord OR "property owner") AND negligen!</code></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:8px">
+      <h4 style="color:var(--navy)"><span style="width:9px;height:9px;border-radius:2px;background:var(--navy);display:inline-block"></span> Build one yourself</h4>
+      <p style="margin:0 0 4px">Ready to construct a real query step by step? <strong>BooleanBuilder</strong> walks you through concepts → synonyms (auto-joined with OR) → truncation &amp; phrases → connectors → a final review — the exact four-move method above.</p>
+      <div class="cta">
+        <a class="btn-link" href="https://booleanbuilder.replit.app/" target="_blank" rel="noopener">Open BooleanBuilder →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WRAP -->
+<section id="recap">
+  <div class="wrap">
+    <div class="prose"><h2>The whole thing on one card</h2></div>
+    <div class="qr">
+      <div><h4>The model</h4><p>The database is a literal clerk — it matches your words and relationships, not your meaning.</p></div>
+      <div><h4>Four moves</h4><p>Concepts → synonyms &amp; phrases (<code class="op">!</code>, <code>" "</code>) → OR within, AND / proximity between → run, review, refine.</p></div>
+      <div><h4>Connectors</h4><p><code class="op">space</code>=OR · <code class="op">&amp;</code>=AND · <code class="op">/s</code> <code class="op">/p</code> <code class="op">/n</code> proximity · <code class="op">!</code> root · <code>" "</code> phrase.</p></div>
+      <div><h4>Top traps</h4><p>Space read as OR · smart quotes · too many ANDs · AND where you needed proximity · forgotten synonyms.</p></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <h2>Sources &amp; notes</h2>
+    <p class="ref">Built for OSU Advanced Legal Research and grounded in that course's materials (the Boolean-search construction activity, the Boolean Taboo exercise, and the natural-language-vs-Boolean comparison). Search examples are illustrative.</p>
+    <ul class="sources">
+      <li>Connector syntax shown is <strong>Westlaw Terms &amp; Connectors</strong>. Lexis and other platforms differ (e.g., different proximity and truncation symbols) — always check your platform's official "terms and connectors" / "search tips" help, as syntax changes over time.</li>
+      <li>Practice tool: <a href="https://booleanbuilder.replit.app/">BooleanBuilder</a> (<a href="https://github.com/rlfordon/BooleanBuilder">source</a>) — a step-by-step Boolean query builder for legal research.</li>
+    </ul>
+    <p class="disclaimer">This is an educational explainer for law students, not legal or research advice for a specific matter. Always verify results and confirm current database syntax against the platform's own documentation.</p>
+  </div>
+</footer>
+
+<!-- ===== teaching-explainer interaction kit (inlined: components.css is in <style> above; components.js + review-mode.js below) ===== -->
+<script>
+/* assets/components.js */
+(function () {
+  const registry = {};
+  function announce(msg) {
+    let live = document.getElementById('te-live');
+    if (!live) {
+      live = document.createElement('div');
+      live.id = 'te-live'; live.className = 'te-sr-only';
+      live.setAttribute('aria-live', 'polite'); live.setAttribute('role', 'status');
+      document.body.appendChild(live);
+    }
+    live.textContent = '';
+    requestAnimationFrame(() => { live.textContent = msg; });
+  }
+  function ensureLiveRegion(el) {
+    if (!el.getAttribute('role')) el.setAttribute('role', 'status');
+    if (!el.getAttribute('aria-live')) el.setAttribute('aria-live', 'polite');
+  }
+  function init(root) {
+    const scope = root || document;
+    scope.querySelectorAll('[data-te]').forEach((el) => {
+      const name = el.getAttribute('data-te');
+      if (registry[name] && !el.dataset.teReady) { registry[name](el); el.dataset.teReady = '1'; }
+    });
+  }
+  registry['predict-reveal'] = function (el) {
+    const btn = el.querySelector('.te-pr-reveal');
+    const answer = el.querySelector('.te-pr-answer');
+    if (!btn || !answer) return;
+    answer.setAttribute('tabindex', '-1');
+    btn.addEventListener('click', () => {
+      answer.hidden = false; btn.setAttribute('aria-expanded', 'true');
+      btn.disabled = true; answer.focus(); announce('Answer revealed');
+    });
+  };
+  const counted = new WeakSet();
+  function bumpTally(isCorrect, el) {
+    const tally = document.querySelector('[data-te-tally]');
+    if (!tally) return;
+    const alreadyCounted = el && counted.has(el);
+    if (el && !alreadyCounted) counted.add(el);
+    const c = +(tally.dataset.correct || 0) + (isCorrect ? 1 : 0);
+    const t = +(tally.dataset.total || 0) + (alreadyCounted ? 0 : 1);
+    tally.dataset.correct = c; tally.dataset.total = t;
+    tally.textContent = `Score: ${c} / ${t}`;
+  }
+  registry['retrieval-mc'] = function (el) {
+    const correct = el.getAttribute('data-answer');
+    const why = el.getAttribute('data-why') || '';
+    const check = el.querySelector('.te-mc-check');
+    const fb = el.querySelector('.te-mc-feedback');
+    ensureLiveRegion(fb);
+    let solved = false;
+    check.addEventListener('click', () => {
+      const picked = el.querySelector('input[type="radio"]:checked');
+      if (!picked) { fb.className = 'te-mc-feedback'; fb.textContent = 'Select an answer first.'; return; }
+      if (picked.value === correct) {
+        if (!solved) { solved = true; bumpTally(true, el); }
+        fb.className = 'te-mc-feedback te-correct'; fb.textContent = 'Correct — ' + why;
+      } else {
+        if (!solved) bumpTally(false, el);
+        fb.className = 'te-mc-feedback te-incorrect'; fb.textContent = 'Not quite — try again.';
+      }
+    });
+  };
+  registry['self-explain'] = function (el) {
+    const input = el.querySelector('.te-se-input');
+    const btn = el.querySelector('.te-se-reveal');
+    const model = el.querySelector('.te-se-model');
+    model.setAttribute('tabindex', '-1');
+    input.addEventListener('input', () => {
+      const ready = input.value.trim().length > 0;
+      btn.disabled = !ready; btn.setAttribute('aria-disabled', String(!ready));
+    });
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      model.hidden = false; model.focus(); announce('Model answer revealed');
+    });
+  };
+  registry['classify'] = function (el) {
+    const items = [...el.querySelectorAll('.te-cl-item')];
+    const cats = [...el.querySelectorAll('.te-cl-cat')];
+    const fb = el.querySelector('.te-cl-feedback');
+    ensureLiveRegion(fb);
+    let selected = null;
+    items.forEach((it) => {
+      it.setAttribute('aria-pressed', 'false');
+      it.addEventListener('click', () => {
+        if (it.getAttribute('aria-disabled') === 'true') return;
+        items.forEach((o) => o.setAttribute('aria-pressed', 'false'));
+        it.setAttribute('aria-pressed', 'true'); selected = it;
+      });
+    });
+    cats.forEach((cat) => {
+      cat.addEventListener('click', () => {
+        if (!selected) { fb.className = 'te-cl-feedback'; fb.textContent = 'Select an item first.'; return; }
+        const want = selected.getAttribute('data-cat');
+        if (want === cat.getAttribute('data-cat')) {
+          selected.setAttribute('aria-disabled', 'true');
+          selected.setAttribute('aria-pressed', 'false');
+          selected.classList.add('te-cl-done');
+          fb.className = 'te-cl-feedback te-correct';
+          fb.textContent = items.every((i) => i.getAttribute('aria-disabled') === 'true') ? 'All sorted.' : 'Correct.';
+          selected = null;
+        } else {
+          fb.className = 'te-cl-feedback te-incorrect';
+          fb.textContent = 'Not quite — that item is not ' + cat.textContent.toLowerCase() + '.';
+        }
+      });
+    });
+  };
+  registry['step-through'] = function (el) {
+    const steps = [...el.querySelectorAll('.te-st-step')];
+    const prog = el.querySelector('.te-st-progress');
+    const prev = el.querySelector('.te-st-prev');
+    const next = el.querySelector('.te-st-next');
+    ensureLiveRegion(prog);
+    let i = 0;
+    function render(focus) {
+      steps.forEach((s, j) => { s.hidden = j !== i; });
+      prog.textContent = `Step ${i + 1} of ${steps.length}`;
+      prev.disabled = i === 0; next.disabled = i === steps.length - 1;
+      if (focus) steps[i].querySelector('h3').focus();
+    }
+    prev.addEventListener('click', () => { if (i > 0) { i--; render(true); } });
+    next.addEventListener('click', () => { if (i < steps.length - 1) { i++; render(true); } });
+    render(false);
+  };
+  window.TE = { init, _registry: registry };
+  document.addEventListener('DOMContentLoaded', () => init(document));
+})();
+</script>
+<script>
+/* assets/review-mode.js — activate with ?edit or the data-review-toggle on <body> */
+(function () {
+  const active = new URLSearchParams(location.search).has('edit')
+    || document.body.hasAttribute('data-review-toggle');
+  if (!active) return;
+  let lastFocus = null;
+  const launch = document.createElement('button');
+  launch.type = 'button'; launch.className = 'te-btn';
+  launch.setAttribute('data-te-review-launch', '');
+  launch.setAttribute('aria-label', 'Review and edit this page');
+  launch.textContent = 'Review & edit';
+  launch.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9999;min-width:44px;min-height:44px;padding:10px 18px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);';
+  const dialog = document.createElement('div');
+  dialog.setAttribute('role', 'dialog'); dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', 'te-review-title'); dialog.setAttribute('tabindex', '-1');
+  dialog.hidden = true;
+  dialog.style.cssText = 'position:fixed;top:10%;left:50%;transform:translateX(-50%);max-width:480px;width:90%;background:#fff;color:#1a1a1a;border:2px solid #1d4ed8;border-radius:8px;padding:24px;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.2);';
+  let notes = [];
+  try { notes = JSON.parse(localStorage.getItem('te-review-notes') || '[]'); } catch (e) {}
+  function saveNotes() { try { localStorage.setItem('te-review-notes', JSON.stringify(notes)); } catch (e) {} }
+  function buildBrief() {
+    if (!notes.length) return '(no notes yet)';
+    let out = '# Revision requests\n(' + notes.length + ' annotation' + (notes.length === 1 ? '' : 's') + ')\n\n';
+    notes.forEach(function (n, i) { out += (i + 1) + '. ' + (n.loc || 'Page') + '\n   Note: ' + n.note + '\n\n'; });
+    out += 'Please apply these to the source HTML.';
+    return out;
+  }
+  function announce(msg) { const live = dialog.querySelector('[data-te-review-status]'); if (live) live.textContent = msg; }
+  function copyNotes() {
+    const text = buildBrief();
+    try { navigator.clipboard.writeText(text); announce('Notes copied to clipboard.'); }
+    catch (e) { announce('Copy failed; clipboard unavailable.'); }
+  }
+  function downloadEdits() {
+    let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    if (notes.length) {
+      const safe = buildBrief().replace(/<!--/g, '<!-').replace(/-->/g, '->').replace(/--/g, '—');
+      html += '\n\n<!-- REVIEWER NOTES\n\n' + safe + '\n\n-->\n';
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+    a.download = (document.title || 'page').replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '-edited.html';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 60000);
+    announce('Edited copy downloaded.');
+  }
+  function setMode(m) {
+    dialog.querySelectorAll('[data-te-mode]').forEach(function (b) {
+      const on = b.dataset.teMode === m;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.style.fontWeight = on ? '700' : '400';
+      b.style.background = on ? '#1d4ed8' : '#f1f5f9';
+      b.style.color = on ? '#fff' : '#1a1a1a';
+    });
+    document.querySelectorAll('[data-te-edit]').forEach(function (el) { el.contentEditable = (m === 'edit') ? 'true' : 'false'; });
+    const notePanel = dialog.querySelector('[data-te-review-note-panel]');
+    if (notePanel) notePanel.hidden = (m !== 'note');
+  }
+  function markEditable() {
+    const skip = '[role="dialog"],[data-te-review-launch],[contenteditable],[data-te-edit]';
+    const sel = 'h1,h2,h3,h4,h5,h6,p,li,blockquote,figcaption,td,th';
+    document.querySelectorAll(sel).forEach(function (el) { if (!el.closest(skip)) el.setAttribute('data-te-edit', ''); });
+  }
+  dialog.innerHTML =
+    '<h2 id="te-review-title" style="margin:0 0 12px;font-size:18px;">Review &amp; edit</h2>' +
+    '<div role="group" aria-label="Mode" style="display:flex;gap:8px;margin-bottom:16px;">' +
+      '<button type="button" data-te-mode="preview" aria-pressed="true" style="min-height:36px;min-width:80px;padding:6px 14px;border:1px solid #1d4ed8;border-radius:6px;cursor:pointer;background:#1d4ed8;color:#fff;font-weight:700;">Preview</button>' +
+      '<button type="button" data-te-mode="edit" aria-pressed="false" style="min-height:36px;min-width:80px;padding:6px 14px;border:1px solid #1d4ed8;border-radius:6px;cursor:pointer;background:#f1f5f9;color:#1a1a1a;">Edit text</button>' +
+      '<button type="button" data-te-mode="note" aria-pressed="false" style="min-height:36px;min-width:80px;padding:6px 14px;border:1px solid #1d4ed8;border-radius:6px;cursor:pointer;background:#f1f5f9;color:#1a1a1a;">Add note</button>' +
+    '</div>' +
+    '<div data-te-review-note-panel hidden style="margin-bottom:16px;">' +
+      '<label for="te-review-note-input" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;">Note for the LLM</label>' +
+      '<textarea id="te-review-note-input" data-te-review-note-input rows="3" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #6b7280;border-radius:6px;font:inherit;font-size:13px;resize:vertical;" placeholder="What should change?"></textarea>' +
+      '<button type="button" data-te-review-note-save style="margin-top:8px;min-height:36px;padding:6px 14px;border:1px solid #1d4ed8;border-radius:6px;cursor:pointer;background:#1d4ed8;color:#fff;font-weight:600;">Save note</button>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button type="button" data-te-review-copy style="min-height:36px;padding:6px 14px;border:1px solid #6b7280;border-radius:6px;cursor:pointer;background:#f9fafb;color:#1a1a1a;">Copy notes for LLM</button>' +
+      '<button type="button" data-te-review-download style="min-height:36px;padding:6px 14px;border:1px solid #6b7280;border-radius:6px;cursor:pointer;background:#f9fafb;color:#1a1a1a;">Download edits</button>' +
+      '<button type="button" data-te-review-close style="min-height:36px;padding:6px 14px;border:1px solid #6b7280;border-radius:6px;cursor:pointer;background:#f9fafb;color:#1a1a1a;margin-left:auto;">Close</button>' +
+    '</div>' +
+    '<div data-te-review-status role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;"></div>';
+  function focusables() {
+    return Array.prototype.slice.call(
+      dialog.querySelectorAll('button:not([disabled]),[href]:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')
+    ).filter(function (el) { return el.getClientRects().length > 0 || el === document.activeElement; });
+  }
+  function saveNote() {
+    const ta = dialog.querySelector('[data-te-review-note-input]');
+    const text = (ta.value || '').trim();
+    if (!text) { announce('Note is empty.'); ta.focus(); return; }
+    notes.push({ loc: document.title || 'Page', note: text });
+    saveNotes(); ta.value = ''; announce('Note saved. ' + notes.length + ' total.'); ta.focus();
+  }
+  function openDialog() {
+    lastFocus = document.activeElement; markEditable(); dialog.hidden = false;
+    const first = focusables()[0]; if (first) first.focus(); else dialog.focus();
+  }
+  function closeDialog() { dialog.hidden = true; setMode('preview'); if (lastFocus) lastFocus.focus(); }
+  dialog.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeDialog(); return; }
+    if (e.key === 'Tab') {
+      const f = focusables(); if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+      else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+    }
+  });
+  dialog.querySelectorAll('[data-te-mode]').forEach(function (b) { b.addEventListener('click', function () { setMode(b.dataset.teMode); }); });
+  dialog.querySelector('[data-te-review-note-save]').addEventListener('click', saveNote);
+  dialog.querySelector('[data-te-review-copy]').addEventListener('click', copyNotes);
+  dialog.querySelector('[data-te-review-download]').addEventListener('click', downloadEdits);
+  dialog.querySelector('[data-te-review-close]').addEventListener('click', closeDialog);
+  launch.addEventListener('click', openDialog);
+  document.body.appendChild(launch); document.body.appendChild(dialog);
+  if (new URLSearchParams(location.search).has('edit') && !document.body.hasAttribute('data-review-toggle')) openDialog();
+  window.TEReview = { open: openDialog, close: closeDialog };
+})();
+</script>
+</body>
+</html>
